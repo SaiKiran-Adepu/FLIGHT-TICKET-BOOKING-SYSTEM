@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>AIRLINE RESERVATION NEXT STEPS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+    <style>
+        body {
+            background-image: url('/static/plane20.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+
+        .transparent-background {
+            background-color: transparent;
+        }
+
+        .transparent-background input {
+            background-color: transparent;
+            border: 1px solid #ccc;
+            color: rgb(17, 17, 17);
+        }
+    </style>
+    <script>
+         function validateForm() {
+            var isValid = true;
+            var pname = document.getElementsByName("pname[]");
+            var page = document.getElementsByName("page1[]");
+
+            for (var i = 0; i < pname.length; i++) {
+                if (pname[i].value.trim() === '') {
+                    alert("Please enter Passenger Name.");
+                    pname[i].focus();
+                    isValid = false;
+                    break;
+                }
+            }
+
+            for (var i = 0; i < page.length; i++) {
+                if (page[i].value.trim() === '') {
+                    alert("Please enter Passenger Age.");
+                    page[i].focus();
+                    isValid = false;
+                    break;
+                }
+            }
+
+            var ad = document.getElementById("ad").value;
+            var ch = document.getElementById("ch").value;
+            
+            if (ad === '') {
+                alert("Please select number of adults.");
+                isValid = false;
+            } else if (ch === '') {
+                alert("Please select number of children.");
+                isValid = false;
+            }
+
+            if (isValid) {
+                var r = confirm("Are you ready for Airplane Reservation? Check All the Details Again");
+                if (r === false) {
+                    alert("Reservation Declined");
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
+
+        function clearFunc() {
+            document.getElementById("email").value = "";
+            document.getElementById("pwd1").value = "";
+        }
+
+    </script>
+    <script>
+    let personCount = 1;
+
+    function updateFares() {
+        // Retrieve base values
+        let baseFare = parseFloat(document.getElementById('base_fare').value) || 0;
+        let classCharge = parseFloat(document.getElementById('class_charge').value) || 0;
+        let quotaDiscount = parseFloat(document.getElementById('quota_discount').value) || 0;
+        let tripDiscount = parseFloat(document.getElementById('trip_discount').value) || 0;
+        let numAdults = parseInt(document.getElementById('ad').value) || 1;
+
+        // Calculate totals
+        //let totalFare = (baseFare + classCharge - quotaDiscount - tripDiscount) * numAdults;
+        let totalFare = (baseFare) * numAdults;
+        let updatedClassCharge = classCharge * numAdults;
+        let updatedQuotaDiscount = quotaDiscount * numAdults;
+        let updatedTripDiscount = tripDiscount * numAdults;
+
+        // Update display fields
+        document.getElementById('class_charge_display').innerText = "Class Charge: ₹" + updatedClassCharge.toFixed(2);
+        document.getElementById("demo1").innerHTML = updatedClassCharge.toFixed(2);
+        document.getElementById('quota_discount_display').innerText = "Quota Discount: ₹" + updatedQuotaDiscount.toFixed(2);
+        document.getElementById("demo2").innerHTML = updatedQuotaDiscount.toFixed(2);
+        document.getElementById('trip_discount_display').innerText = "Trip Discount: ₹" + updatedTripDiscount.toFixed(2);
+        document.getElementById("demo3").innerHTML = updatedTripDiscount.toFixed(2);
+        document.getElementById('fare_display').innerText = "Total Fare: ₹" + totalFare.toFixed(2);
+        document.getElementById("demo4").innerHTML = totalFare.toFixed(2);
+        
+    }
+
+    function addPassenger() {
+        personCount++;
+        document.getElementById('ad').value = personCount;
+        document.getElementById('rad').style.display = "inline";
+        updateFares();
+    }
+
+    function removePassenger() {
+        if (personCount > 1) {
+            personCount--;
+            document.getElementById('ad').value = personCount;
+            updateFares();
+        }
+        if (personCount === 1) {
+            document.getElementById('rad').style.display = "none";
+        }
+    }
+
+    function addFields() {
+        var container = document.getElementById("dynamicFields");
+        var newFieldSet = document.createElement("fieldset");
+        newFieldSet.setAttribute("style", "width:120%; height:60%;");
+        newFieldSet.innerHTML =
+            '<p>Passenger Details</p>' +
+            '<table><tr>' +
+            '<td>Name: <input type="text" name="pname[]" placeholder="PASSENGER NAME"/><br><br></td>' +
+            '<td>Age: <input type="text" name="page1[]" placeholder="PASSENGER AGE" /><br><br></td>' +
+            '<td>Gender: <select name="pgen1[]" class="transparent-background">' +
+            '<option value="Male">Male</option>' +
+            '<option value="Female">Female</option>' +
+            '<option value="Ntf">Not To Specify</option>' +
+            '</select><br><br></td>' +
+            '</tr></table>';
+        newFieldSet.style.maxWidth = "900px";
+        container.appendChild(newFieldSet);
+        document.getElementById("rad").style.display = "inline";
+        updateFares();
+    }
+
+    function removeLastField() {
+        var container = document.getElementById("dynamicFields");
+        var fieldsets = container.getElementsByTagName("fieldset");
+
+        if (fieldsets.length > 0) {
+            container.removeChild(fieldsets[fieldsets.length - 1]);
+            updateFares();
+        } else {
+            alert("Cannot remove the last field.");
+        }
+
+        if (fieldsets.length === 0) {
+            document.getElementById("rad").style.display = "none";
+        }
+    }
+
+    function addFPa() {
+        addPassenger();
+        addFields();
+    }
+
+    function reFPa() {
+        removePassenger();
+        removeLastField();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateFares(); // Initial update on page load
+
+        // Add event listeners to dynamically update fares
+        document.getElementById('ad').addEventListener('change', updateFares);
+        document.getElementById('base_fare').addEventListener('input', updateFares);
+        document.getElementById('class_charge').addEventListener('input', updateFares);
+        document.getElementById('quota_discount').addEventListener('input', updateFares);
+        document.getElementById('trip_discount').addEventListener('input', updateFares);
+    });
+
+   
+</script>
+
+<script>
+    function updateHiddenFields() {
+        var classCharge = document.getElementById("class_charge_display").innerText;
+        var quotaDiscount = document.getElementById("quota_discount_display").innerText;
+        var tripDiscount = document.getElementById("trip_discount_display").innerText;
+        var fare = document.getElementById("fare_display").innerText;
+
+        document.getElementById("class_charge_hidden").value = classCharge;
+        document.getElementById("quota_discount_hidden").value = quotaDiscount;
+        document.getElementById("trip_discount_hidden").value = tripDiscount;
+        document.getElementById("fare_hidden").value = fare;
+    }
+
+    document.querySelector('form').addEventListener('submit', updateHiddenFields);
+</script>
+
+
+</head>
+<body>
+    <center>
+        <form name="F1" method="POST" onsubmit="return validateForm()" action="{{ url_for('admin_dashboard_bp.ticket_admin3') }}">
+            <fieldset style="width:100%; height:60%;">
+                <h3><font color="blue">AIRLINE RESERVATION NEXT STEPS</font></h3>
+                <input type="hidden" id="class_charge_hidden" name="class_charge" value="0.00">
+    <input type="hidden" id="quota_discount_hidden" name="quota_discount" value="0.00">
+    <input type="hidden" id="trip_discount_hidden" name="trip_discount" value="0.00">
+    <input type="hidden" id="fare_hidden" name="fare" value="0.00">
+                <table height="100" width="1300">
+                    <tr style="color: white;">
+                        <td>Origin: {{ combined_data.origin }}</td>
+                        <td>Departure: {{ combined_data.jdt }}</td>
+                        <td>Return: {{ combined_data.rdt }}</td>
+                        <td>Destination: {{ combined_data.dest }}</td>
+                    </tr>
+                   
+                    <tr style="color: white;">
+                        <td>Airplane Number: {{ combined_data.flight_number }} &nbsp&nbsp&nbsp</td>
+                        <td>Airplane Name: {{ combined_data.flight_name }} &nbsp&nbsp&nbsp</td>
+                        <td>Class: {{ combined_data.class_type }} &nbsp&nbsp&nbsp</td>
+                        <td>Quota: {{ combined_data.ticket_type }} &nbsp&nbsp&nbsp</td>
+                        <td><input type="text" id="base_fare" name="base_fare" value="{{ combined_data.total_fare }}" hidden readonly></td>
+                        <td><input type="text" id="class_charge"  value="{{ combined_data.class_charge }}" hidden readonly></td>
+                        <td> <input type="text" id="quota_discount" name="quota_discount" value="{{ combined_data.quota_discount }}" hidden readonly></td>
+                        <td><input type="text" id="trip_discount" name="trip_discount" value="{{ combined_data.trip_discount }}" hidden readonly><br><br></td>
+                    
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="color: white;"><hr></td>
+                    </tr>
+                
+                    <tr>  
+                    
+                        <td>
+                            
+                             <span id="class_charge_display"></span>
+                             <textarea id="demo1" name="class_charge1" readonly hidden></textarea>
+                            </td>
+                        <td>
+                            <span id="quota_discount_display">0.00</span>
+                           <textarea id="demo2" name="quota_discount1" readonly hidden></textarea>
+                        </td>
+                        <td>
+                            <span id="trip_discount_display" >0.00</span>
+                             <textarea id="demo3" name="trip_discount1" readonly hidden></textarea>
+                        </td>
+                        <td>
+                             <span id="fare_display" >0.00</span>
+                              <textarea id="demo4" name="total_fare1" readonly hidden></textarea>
+                              
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="color: white;"><hr></td>
+                    </tr>
+                    <tr>
+                
+                        <td><h3><font color="#4B0082">Passenger Details:</font></h3></td>
+                    </tr>
+                
+                    <tr>
+                        <td>
+                            <input type="hidden" id="class_charge_hidden" name="class_charge" value="0.00">
+                            <input type="hidden" id="quota_discount_hidden" name="quota_discount" value="0.00">
+                            <input type="hidden" id="trip_discount_hidden" name="trip_discount" value="0.00">
+                            <input type="hidden" id="total_fare_hidden" name="total_fare" value="0.00">
+                            <tr>
+                               
+                                {% if session.get('adm') %}
+                                <td><textarea rows="1" cols="15" name="adm" id="adm"  fixed readonly hidden>{{ session['adm'] }}</textarea></td>
+                                {% endif %}
+                            </tr>
+                        </td>
+                    </tr>
+                    <tr class="transparent-background">
+                        <td>Name: <input type="text" name="pname[]" placeholder="PASSENGER NAME"></td>
+                        <td>Age: <input type="text" name="page1[]" placeholder="PASSENGER AGE"></td>
+                        <td>Gender: 
+                            <select name="pgen1[]" class="transparent-background">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Ntf">Not To Specify</option>
+                            </select>
+                        </td>
+                        <td>
+                            <label for="ad">ADULT:</label>
+                            <input type="text" id="ad" value="1" name="ad" readonly style="width: 50px;">
+                            CHILD:
+                            <select name="ch" id="ch" class="transparent-background">
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                                <option value="10">10</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="color: white;"><hr></td>
+                    </tr>
+                </table>
+                <br>
+                <div id="dynamicFields"></div>
+                <input type="button" value="+Add Person" id="aad" onclick="addFPa()" class="btn btn-primary"/>
+                <input type="button" value="-Remove Person" id="rad" onclick="reFPa()" class="btn btn-secondary" style="display:none"/><br><br>
+                User Number: <input type="text" name="uno" placeholder="User Number If Register !" class="transparent-background"></td>
+                <br><br>
+                <input type="submit" value="CONTINUE" class="btn btn-primary">
+                <input type="reset" value="RESET" onclick="clearFunc()" class="btn btn-secondary">
+                <a href="javascript:history.back()"><input type="button" value="BACK" class="btn btn-secondary"></a>
+            </fieldset>
+           
+        </form>
+    </center>
+</body>
+</html>

@@ -1,0 +1,50 @@
+# SKA-ONLINE-BANKING-SYSTEM
+The Application is based on Modern Banking how the day to day the transactions are done with bank admins called manager cashier and user, For this I used Technologies HTML JS CSS as a Frontend, JSP Java as backend code development and Oracle SQL as database In this project there are four Main modules
+The Online Banking System the application is based on the banking system with the Admin/Manager/Cashier and User modules the Admin can controll all the records and information and transaction's done using the bank and
+all the transactions done through bank account will trackable by bank admins and user in a transaction Enquiry
+1. Bank Manager Can log in to the web site and audit the bank accounts
+2. Bank Cashier can handle the withdrawal deposit and user related transaction enquiry details, Creating new account fund transfer etc
+3. Bank User can login to the application and check the bank balance and transfer the fund from user bank account to another user account with a Realtime transaction system and here I restricted the transaction when user don't have enough fund to transfer at the end of transaction user can re verify the bank transaction using as transaction history on the same user portal just like an UPI 
+4. Bank User register/Sign up for this I developed like an API that controls the Bank cashier with a new account register accept page 
+GitHub Link: https://github.com/SaiKiran-Adepu/SKA-ONLINE-BANKING-SYSTEM
+
+# SKA Train Ticket Reservation System
+The Application is mainly based on the IRCTC web application here passengers can allowed to book a reservation ticket while login in the application 
+to achieve this i am used Technologies front end Html, CSS, JS Backend JAVA JSP, and Database MYSQL
+in this project there are 3 main modules  
+1. Train Admin: the Admin of the web application can login to the application with Admin Privileges, after the successful login to the application admin can register a new trains that which are running from source to Destination ex Secunderabad to New Delhi for this i am used an API that retrieve automatic stations that registered with the project which will restricts the duplicates of data inserts into DB table and admin can book a ticket he can check all the details of the reservation like reservation done by PNR number seat number payment mode Admin Can Control all the information of Trains Running status Adding New Trains, Train Ticket Reservation, Modify Train Fare, etc
+2. Train User he can login with the user privileges and he can book a ticket while selecting the from to stations on the ticket reservation menu after the selection the available trains will display there user can select any train and book a ticket via payment gateway SKA-Banking which is an Payment API, user can Update Credentials like password mobile number update and feedback to the authorized Admins About any issues and Maintenance. .
+3. Register/Signup the new user need to register Him/her self while clicking on the Register Button on the Index page of Online SKA Train Ticket Reservation System to book a ticket.
+GitHub Link: https://github.com/SaiKiran-Adepu/SKA-TRAIN-TICKET-RESERVATION-SYSTEM
+
+
+SKA Airline Ticket Reservation System
+The Application is mainly based on the IRCTC Flights web application here passengers can allowed to book a reservation ticket while login in the application 
+to achieve this i am used Technologies front end Html, CSS, JS Backend Python Flask, and Database MYSQL
+in this project there are 3 main modules  
+1. Airline Admin: the Admin of the web application can login to the application with Admin Privileges, after the successful login to the application admin can register a new Airlines(Airplanes) that which are operating from Origin to Destination ex New Delhi to New York for this i am used an API that retrieve automatic Airports that registered with the project which will restricts the duplicates of data inserts into DB table and admin can book a ticket he can check all the details of the reservation like reservation done by PNR number seat number payment mode etc
+here if any error that occurs while booking a ticket it automatically returns back to the first page which will reduce the server load 
+2. Airline User he can login with the user privileges and he can book a ticket while selecting the from to Airports on the ticket reservation menu after the selection the available Airlines will display there user can select any Airline and book a ticket via payment gateway SKA-Banking which is an Payment API.
+3. Register/Signup the new user need to register to access the Airline Reservation
+
+
+Environmental variable path setup
+to setup a tomcat server to run MySQL and oracle sql
+just place ojdbc14 or 11 and MySQL connector 8 inside the tomcat folder lib and give environmental variable as class path 
+
+and give Catalina home and java home 
+
+CATALINA_HOME: D:\Apache Software Foundation\Tomcat 10.1\bin\startup.bat
+
+JAVA_HOME: C:\Program Files\Java
+
+CLASSPATH: D:\Apache Software Foundation\Tomcat 10.1\lib\servlet-api.jar;D:\Apache Software Foundation\Tomcat 10.1\lib
+
+and PATH: C:\Program Files\Java\jdk-22\bin
+
+for python its an automatic process while installation 
+
+for python MySQL just type in CMD pip install mysql-connector-python
+
+
+

@@ -1,0 +1,27 @@
+latest one is latest ie
+airline0 is old
+airline1 is new than airline0
+
+similarly see the last version
+
+airline 3 upto index page is changing there
+airline 4 upto index page is changing there ticket_index with guest user
+routes.py for html routesh.py got .py files the common files in the web site
+
+airline v 4
+in this data retrives from db table where it needed to write like routes_html.py inside the module where we need
+done upto airport_fare
+
+version 7 
+done with adding plane quota while adding a new plane
+
+version 8 
+done with new user registration with error flash whwn duplicate or refresh the page
+also checked all the pages with where falsh present like admin add airport fare flight if any duplicates
+also restricted the refresh page when the endpoint like user_resiter_success.html if we again reload it will redirect to first page with error message like it already exist these will help to prevent the data duplicates in DB
+
+Version 9 
+In this version all index guest related things are done with all testing and ticket Index and user feedback
+if the flights with origin destination of fares doesn't exist then it will popup an alert
+and cleared the issue with journey date with return date is less than the JD
+user side reservation in progress

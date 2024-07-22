@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Airline Reservation Success</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body onkeydown="return(event.keyCode == 154)">
+    
+    <center>
+       
+        
+    </center>
+    <center>
+        <form name="F1">
+            <fieldset style="width:100%; height:60%;">
+                <h3><font color="blue">AIRLINE RESERVATION BOOKING DETAILS</font></h3><br>
+                <table height="100" width="1450" border="2px">
+                    <tr>
+                        <td><font color="orange"><h4>Journey Details</h4></font></td>
+                        </tr>
+                        <tr>
+                        <td>Origin: {{ orn }}</td>
+                        <td>Departure: {{ jdt }}</td>
+                        <td>Return: {{ rdt }}</td>
+                        <td>Destination: {{ dest }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="color: white;"></td>
+                    </tr>
+                    <tr>
+                        <td>Airplane Number: {{ flight_number }}</td>
+                        <td>Airplane Name: {{ flight_name }}</td>
+                        <td>Class: {{ clt }}</td>
+                        <td>Trip Type: {{ tt }}</td>
+                        
+                    </tr>
+
+                    <td><h4><font color="green">Passenger Details</font></h4></td>
+                </tr>
+                <!-- Iterate over passenger details -->
+                {% for sitting in sitting_details %}
+                        <tr>
+                             <td> Passenger Name: {{ sitting.name }}</td>
+                             <td> Age: {{ sitting.age }}</td>
+                            <td> Gender: {{ sitting.gender }}</td>
+                            <td> Seat Number: {{ sitting.seat_number }}</td>
+                        </tr>
+                    {% endfor %}
+                    
+                </tr>
+
+                  
+                      
+                    
+                </table>
+                <br>
+                <table height="100" width="1450" border="2px">
+                 
+
+                <tr>
+                    <td><font color="blue"><h4>Fare Summary</h4></font></td>
+                    </tr>
+                <tr>
+                    <td>Adult {{ ad }}: 
+                &nbsp&nbspChild {{ ch }}:
+                &nbsp&nbspBase Fare: {{ bsf }}</td>
+                <td>Class Fare: {{ cf }} </td>
+                <td>Quota Discount: {{ qdt }} 
+                &nbsp&nbspTrip Mode: {{ trm }}</td>
+                <td>Trip Discount: {{ td }}
+                &nbsp&nbspTotal Fare: {{ tf }}
+                &nbsp&nbsp KM: {{ km }}</td>
+
+
+                </tr>
+                <tr>
+                    
+                            
+                </tr>
+                </table>
+                <br><br>
+                <strong>SKA AIRLINES offers over 1% discount on the Round Trip Mode to passengers at the same time of booking.</strong>
+        <br>
+        <strong>Special category passengers need to carry a photo identity card issued by the government for on-board/off-board verification during the journey. This includes quota/ticket types such as Defence, Govt Employee, Senior Citizen, and Student. Don't forget to carry your identity card!</strong>
+        <br><br>
+
+                
+                <button onclick="window.print()" class="btn btn-primary">PRINT</button>
+                <!--<a href="javascript:history.back()"><input type="button" value="BACK" class="btn btn-secondary"></a>!-->
+                <button onclick="window.close()" class="btn btn-secondary">CLOSE</button>
+            </fieldset>
+        </form>
+    </center>
+
+</body>
+</html>

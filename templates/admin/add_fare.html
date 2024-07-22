@@ -1,0 +1,138 @@
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>ADD FARE</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+		<script LANGUAGE="JavaScript">
+         
+    function login(form)
+	{
+		var frm = document.getElementById("AIRPORTS").value;
+        var km = document.getElementById("km").value;
+		var fare = document.getElementById("fare").value;
+		if(frm =='')
+		{
+			alert("PLEAE ENTER AIRPORTS.");
+			return false;
+		}
+		else if(km=='')
+		{
+        	alert("PLEASE ENTER KM");
+			return false;
+		}
+        		else if(fare=='')
+		{
+        	alert("PLEASE ENTER FARE");
+			return false;
+		}
+		else
+		{
+		  //alert("please fill corect details");
+	
+		  
+		}
+	}
+		function clearFunc()
+	{
+		document.getElementById("email").value="";
+		document.getElementById("pwd1").value="";
+	}	
+	
+		</script>
+		      <script type="text/javascript">
+     document.onload = ctck();
+     
+function addStation() {
+    var stationInput = document.getElementById('airport');
+    var selectedAIRPORTSInput = document.getElementById('AIRPORTS');
+    
+    if (selectedAIRPORTSInput.value !=='') {
+        selectedAIRPORTSInput.value +=','+stationInput.value;
+    } else {
+        selectedAIRPORTSInput.value = stationInput.value;
+    }
+    stationInput.value ='';
+}
+        </script>
+    </head>
+    <body>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert alert-danger" role="alert">
+            {% for message in messages %}
+            <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        <style>
+            body {
+                background-image: url('/static/plane21.jpg');
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                background-size: cover;
+            }
+            .transparent-button {
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 0;
+            }
+            .clickable-img {
+                cursor: pointer;
+            }
+        </style>
+	<center>
+        <form method = "post" onSubmit="return login(this)" action="{{ url_for('admin.add_fare_bp.add_fare') }}">
+            <fieldset style="width:35%">
+                <h3><center>ADD FARE</center></h3>
+                <hr>
+                <table>
+				  <tr><td>SELECT AIRPORTS:</td><td>
+                    <input list="airports" id="airport" placeholder="SELECT AIRPORT">
+                    <datalist id="airports">
+                            {% for airport in airports %}
+                                <option value="{{ airport.airport_name }}">{{ airport.airport_name }}</option>
+                            {% endfor %}
+                        </datalist>
+                          <br>
+	
+            <input type="button" value="Add Airport" onclick="addStation()" class="btn-primary">
+            </td></tr>
+                <tr>
+
+                        <td>SELECTED AIRPORTS<font color="red">*</font>:</td>
+                        <td> <input type = "text" name = "airport" id="AIRPORTS" Placeholder="SELECTED AIRPORTS"></td>
+                    </tr>
+                   
+                    <tr>
+                        <td>FARE<font color="red">* </font>:</td>
+                        <td><input type = "number" name = "fare" id="fare"  Placeholder="FARE"></td>
+                    </tr>
+					  <tr>
+                        <td>KM<font color="red">* </font>:</td>
+                        <td><input type = "number" name = "km" id="km"  Placeholder="KM"></td>
+                    </tr>
+                    <tr>
+                    
+                    {% if session.get('adm') %}
+                    <td><textarea rows="1" cols="15" name="adm" id="adm"  fixed readonly hidden>{{ session['adm'] }}</textarea></td>
+                    {% endif %}
+					
+                    
+                        <td><input type = "submit" value="ADD" name = "s1" class="btn-primary" onClick ="login(this.form)">
+						<input type="reset" value="RESET" onclick="clearFunc()" class="btn-secondary">
+						
+						</td>
+                    </tr>
+                </table>
+            </fieldset>
+        </form>
+		<h4><font color="white">NOW AIRPORT NAMES DIRECTLY RETRIEVED FROM DATABASE TABLE....</font></h4>
+        <br>
+		
+           </center>
+	</body>
+</html>

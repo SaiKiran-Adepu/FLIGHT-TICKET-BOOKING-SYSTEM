@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New Flight Form</title>
+</head>
+<body>
+    <h1>Select Airport:</h1>
+    <form method="POST" action="/submit_flight">
+        <input list="dest" name="selected_airport" placeholder="Select an airport">
+        <datalist id="dest">
+            {% for airport in airports %}
+            <option value="{{ airport[0] }}">{{ airport[0] }}</option>
+            {% endfor %}
+        </datalist>
+        <br><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>

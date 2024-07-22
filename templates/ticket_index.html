@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Airline Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script>
+        function swapText() {
+            var textBox1Value = document.getElementById("train1").value;
+            var textBox2Value = document.getElementById("train2").value;
+            document.getElementById("train1").value = textBox2Value;
+            document.getElementById("train2").value = textBox1Value;
+        }
+    </script>
+    <script>
+        function login(form) {
+            var t1 = document.getElementById("train1").value;
+            var t2 = document.getElementById("train2").value;
+            var doj = document.getElementById("doj").value;
+            var tyc = document.getElementById("tyc").value;
+            var tyb = document.getElementById("tyt").value;
+            if (t1 == '') {
+                alert("Please Select From");
+                return false;
+            } else if (t2 == '') {
+                alert("Please select TO");
+                return false;
+            } else if (document.F1.train1.value == document.F1.train2.value) {
+                alert("Your Selected Same Stations!");
+                document.F1.train1.focus();
+                document.F1.train2.value = "";
+                return false;
+            } else if (doj == '') {
+                alert("Please select Date of Journey");
+                return false;
+            } else if (tyc == '') {
+                alert("Please select Type of Ticket");
+                return false;
+            } else if (tyt == '') {
+                alert("Please select Type of Booking");
+                return false;
+            }
+        }
+        function clearFunc() {
+            document.getElementById("email").value = "";
+            document.getElementById("pwd1").value = "";
+        }
+    </script>
+    <style>
+        body {
+            background-image: url('/static/plane18.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+        .transparent-button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+        .clickable-img {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <form name="F1" method="POST" onSubmit="return login(this)" action="ticketbi.jsp">
+            <fieldset style="width:32%; border-end-start-radius:25;">
+                <h3>BOOK A TICKET</h3>
+                <hr>
+                <table>
+                    <tr>
+                        <td>
+                            <img src="{{ url_for('static', filename='from2.png') }}" width="21" height="16">
+                            <input list="source" name="SOURCE" id="train1" placeholder="ORIGIN">
+                            <datalist id="source" name="train1">
+                                {% for airport in airports %}
+                                    <option value="{{ airport.airport_name }}">{{ airport.airport_name }}</option>
+                                {% endfor %}
+                            </datalist>
+                        </td>
+                        <td>
+                            <script type="text/javascript">
+                                window.onload = function() {
+                                    var today = new Date().toISOString().split('T')[0];
+                                    document.getElementsByName("setTodaysDate")[0].setAttribute('min', today);
+                                }
+                            </script>
+                            <input name="setTodaysDate" type="date" id="doj">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <img src="{{ url_for('static', filename='updo.png') }}" alt="Arrow Up" width="20" height="20" onclick="swapText()" class="clickable-img">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="{{ url_for('static', filename='to.jpg') }}" width="22" height="16">
+                            <input list="source" name="dest" id="train2" placeholder="DESTINATION">
+                            <datalist id="source" name="train1">
+                                {% for airport in airports %}
+                                    <option value="{{ airport.airport_name }}">{{ airport.airport_name }}</option>
+                                {% endfor %}
+                            </datalist>
+                        </td>
+                        <td>
+                            <select name="tycl" id="tyc">
+                                <option value="FIRST CLASS">FIRST CLASS</option>
+                                <option value="BUSINESS CLASS">BUSINESS CLASS</option>
+                                <option value="PREMIUM ECONOMY">PREMIUM ECONOMY</option>
+                                <option value="ECONOMY">ECONOMY</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <br>
+                            <script>
+                                function showAlert() {
+                                    var ld = document.getElementById("tyt").value;
+                                    if (ld === "LADIES" || ld === "PHC") {
+                                        alert("Specially abled passengers need to carry a Photo Identity card issued by the Government which is to be produced for On-board / Off-board verification during the journey.: " + ld);
+                                    }
+                                }
+                            </script>
+                            <label for="tyt">Type OF Ticket:</label>
+                            <select name="tyt" id="tyt" onchange="showAlert()">
+                                <option value="GENERAL">REGULAR</option>
+                                <option value="LADIES">DEFENCE</option>
+                                <option value="TATKAL">GOVT EMPLOYEE</option>
+                                <option value="PREMIUM TATKAL">SENIOR CITIZEN</option>
+                                <option value="PHC" id="phc">STUDENT</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                    </tr>
+                </table>
+                <br>
+                <input type="submit" value="BOOK" onClick="login(this.form)" class="btn-primary">
+                <input type="reset" value="RESET" onclick="clearFunc()" class="btn-secondary">
+                <a href="{{ url_for('home') }}"><input type="button" value="Back" class="btn-secondary"></a>
+            </fieldset>
+        </form>
+        <br>
+    </center>
+    {% if error %}
+    <p>{{ error }}</p>
+{% endif %}
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>AIRLINE RESERVATION NEXT STEPS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="{{ url_for('static', filename='datetime.js') }}"></script>
+    <style>
+        .transparent-background {
+            background-color: transparent;
+        }
+        .transparent-background input {
+            background-color: transparent;
+            border: 1px solid #ccc;
+            color: rgb(17, 17, 17);
+        }
+    </style>
+<script>
+    function validateForm() {
+       var isValid = true;
+
+       if (isValid) {
+           var r = confirm("Please Check All the Details Again");
+           if (r === false) {
+               alert("Reservation Declined");
+               isValid = false;
+           }
+       }
+
+       return isValid;
+   }
+</script>
+
+
+
+
+
+</head>
+<body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="alert alert-danger" role="alert">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <center>
+        <form name="F1" method="POST" onsubmit="return validateForm()" action="{{ url_for('admin.ticket_admindb_bp.ticket_admindb') }}">
+            <fieldset style="width:100%; height:60%;">
+                <h3><font color="blue">AIRLINE RESERVATION REVIEW THE DETAILS</font></h3><br>
+                <table height="100" width="1450" border="2px">
+                    <tr>
+                        <td><font color="orange"><h4>Review Journey</h4></font></td>
+                        </tr>
+                        <tr>
+                        <td>Origin: {{ combined_data1.origin }}</td>
+                        <td>Departure: {{ combined_data1.jdt }}</td>
+                        <td>Return: {{ combined_data1.rdt }}</td>
+                        <td>Destination: {{ combined_data1.dest }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="color: white;"></td>
+                    </tr>
+                    <tr>
+                        <td>Airplane Number: {{ combined_data1.flight_number }}</td>
+                        <td>Airplane Name: {{ combined_data1.flight_name }}</td>
+                        <td>Class: {{ combined_data1.class_type }}</td>
+                        <td>Trip Tyep: {{ combined_data1.ticket_type }}</td>
+                        
+                    </tr>
+
+                    <tr>
+                        <td><font color="blue"><h4>Fare Summary</h4></font></td>
+                        </tr>
+                    <tr>
+                        <td>Adult: {{ combined_data1.ad }}
+                    &nbsp&nbspChild: {{ combined_data1.ch }}
+                    &nbsp&nbspBase Fare: {{ combined_data1.base_fare }}</td>
+                    <td>Class Fare: {{ combined_data1.class_charge1 }}</td>
+                    <td>Quota Discount: {{ combined_data1.quota_discount1 }}
+                    &nbsp&nbspTrip Mode: {{ combined_data1.trip_mode }}</td>
+                    <td>Trip Discount: {{ combined_data1.trip_discount1 }}
+                    &nbsp&nbspTotal Fare: {{ combined_data1.total_fare1 }}
+                    &nbsp&nbsp KM: {{ combined_data1.km }}</td>
+
+
+                    </tr>
+                      
+                    
+                </table>
+                <br>
+                <table height="100" width="1450" border="2px">
+                    <td><h4><font color="green">Passenger Details</font></h4></td>
+                </tr>
+                <!-- Iterate over passenger details -->
+                {% for i in range(combined_data1.pnames|length) %}
+                <tr>
+                    <td>Passenger Name: {{ combined_data1.pnames_upper[i] }}</td>
+                    <td>Passenger Age: {{ combined_data1.page1[i] }}</td>
+                    <td>Passenger Gender: {{ combined_data1.pgen1[i] }}</td>
+                    {% endfor %}
+                    
+                </tr>
+                <tr>
+                    <td>Plane Booking Admin<font color="red">*</font>:&nbsp{{ combined_data1.adm }}
+                    
+                                <td><textarea id="demo1" name="dob" rows1 cols=25  width="20"fixed readonly hidden></textarea></td>
+                            
+                </tr>
+                </table>
+                <br><br>
+                <strong>SKA AIRLINES offers over 1% discount on the Round Trip Mode to passengers at the same time of booking.</strong>
+        <br>
+        <strong>Special category passengers need to carry a photo identity card issued by the government for on-board/off-board verification during the journey. This includes quota/ticket types such as Defence, Govt Employee, Senior Citizen, and Student. Don't forget to carry your identity card!</strong>
+        <br><br>
+
+                <input type="submit" value="CONTINUE" class="btn btn-primary">
+                <a href="javascript:history.back()"><input type="button" value="BACK" class="btn btn-secondary"></a>
+            </fieldset>
+        </form>
+    </center>
+</body>
+</html>

@@ -1,0 +1,69 @@
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>PNR ENQUIRY</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+		<script LANGUAGE="JavaScript">
+         
+    function login(form)
+	{
+		var pnr = document.getElementById("pnr").value;
+		if(pnr =='')
+		{
+			alert("PLEAE ENTER PNR NUMBER.");
+			return false;
+		}
+		
+		else
+		{
+		  //alert("please fill corect details");
+		  //window.location.href =ul;
+		 //const myWindow.document.open(+<form method = post action = "http://192.168.43.42:8181/test/Jdbin.jsp"); 
+		  //document.writeln("<form method = post action = http://192.168.43.42:8181/uservaljsp/Jdbin.jsp ">
+		  
+		  
+		  
+		}
+	}
+	
+		</script>
+    </head>
+    <body>
+        <style>
+            body {
+                background-image: url('/static/plane20.jpg');
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                background-size: cover;
+            }
+        </style>
+	<center>
+        <form method = "post" onSubmit="return login(this)" action = "PNRbiu.jsp">
+            <fieldset style="width:23%">
+                <h3><center>PNR ENQUIRY</center></h3>
+                <hr>
+                <table>
+                    <tr>
+                        <td>PNR NUMBER<font color="red">*</font>:</td>
+                        <td> <input type = "number" name = "pnr" id="pnr" Placeholder="PNR NUMBER" required></td>
+                    </tr>
+                   
+                    <tr>					
+                        <td></td>
+                        <td><input type = "submit" value="ENQUIRY" name = "s1" onClick ="login(this.form)" class="btn-primary">
+						<input type="reset" value="RESET" onclick="clearFunc()" class="btn-secondary">
+                        <a href="{{ url_for('home') }}"><INPUT TYPE="button" VALUE="Back" class="btn-secondary"></a>
+						
+						</td>
+                    </tr>
+                </table>
+            </fieldset>
+        </form>
+		<h3><font color="blue">THE PUBLIC USERS CAN VIEW ONLY SPECIFIC DETAILS OF A AEROPLANE RESERVATION LIKE PNR NUMBER PLANE NUMBER PLANE NAME ORIGIN TO DEPATURE TIME CLASS BOOKING STATUS.</font></h3>
+        <br>
+		
+           </center>
+	</body>
+</html>

@@ -1,0 +1,59 @@
+<html>
+<head>
+    <title>Your Feedback</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+        <script src="{{ url_for('static', filename='datetime.js') }}"></script>
+</head>
+<body>
+    <style>
+        body {
+            background-image: url('/static/plane21.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+    </style>
+
+    <center>
+        <form method = "post" onSubmit="return login1(this)" action="{{ url_for('guest.feedback_index_bp.feedback_index') }}">
+            <fieldset style="width:38%">
+                <h3><center><font color="blue">Your FeedBack</font></center></h3>
+                <hr>
+                <table>
+                    <tr>
+                        <td><font color="blue">Name:</font></td>
+                        <td> <input type = "text" name = "name" id="name" Placeholder="NAME" required></td>
+                    </tr>
+                    <tr>
+                        <td><font color="blue">FeedBack:</font></td>
+                        <td><textarea name = "feed" id="feed"  Placeholder="YOUR FEEDBACK HERE" required></textarea></td>
+                    </tr>
+					<textarea id="demo1" name="dofdb" hidden>
+					</textarea>
+
+<tr>
+	
+		 
+		 </td>
+		 </tr>
+                    <tr>
+                        <td></td>
+                        <td><input type = "Submit" value="Submit FeedBack" name = "s1" onClick ="login1(this.form)">
+						<input type="reset" value="Reset" onclick="clearFunc()">
+                        <button onclick=window.close() class="btn-primary"> CLOSE</button>
+						
+						</td>
+                    </tr>
+                </table>
+            </fieldset>
+        </form>
+		<br>
+		<br>
+         
+	</center>
+ 
+
+
+
+</body>
+</html>

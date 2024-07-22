@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Feedback Success</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body onkeydown="return(event.keyCode == 154)">
+    <style>
+        body {
+            background-image: url('/static/plane6.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size:cover;
+        }
+    </style>
+    <center>
+<font color="white">
+    <h3>Thank You for Your Feedback!&nbsp{{ request.form.name }}</h3>
+    
+
+        <h6>Your Feedback:({{ request.form.feed }})</h6><br>
+        <h6>Date:({{ request.form.dofdb }})</h6>
+<br>
+        <h3>Feedback Successfully Submitted!</h3>
+
+    
+</font>
+    <a href="{{ url_for('guest_dashboard_bp.feedback_index') }}"><button class="btn-primary">BACK</button></a>
+    <button onclick=window.close() class="btn-primary" class="btn-secondary"> CLOSE</button>
+</center>
+</body>
+</html>

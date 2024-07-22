@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Success</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body onkeydown="return(event.keyCode == 154)">
+    <style>
+        body {
+            background-image: url('/static/airport6.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size:cover;
+        }
+    </style>
+    <center>
+<font color="white">
+    <h1>Airport Registered Successfully!</h1>
+    <p>Airport Name: {{ airport_name }}</p>
+    <button><a href="{{ url_for('admin_dashboard_bp.add_airport') }}">Back to Dashboard</a></button>
+</center>
+</body>
+</html>

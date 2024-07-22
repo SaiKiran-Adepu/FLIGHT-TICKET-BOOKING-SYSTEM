@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Fare Success</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body onkeydown="return(event.keyCode == 154)">
+    <style>
+        body {
+            background-image: url('/static/airport6.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size:cover;
+        }
+    </style>
+    <center>
+<font color="white">
+    <h3>Flight Fare Registered Successfully!</h3>
+    <h4>AIRPORT NAMES: {{ airport}}</h4>
+    <h4>FARE: {{ fare }}</h4>
+    <h4>KM: {{ kmf }}</h4>
+    <p>ADMIN: {{ aadm }}</p>
+    <button><a href="{{ url_for('admin_dashboard_bp.add_fare') }}">Back to Dashboard</a></button>
+</center>
+</body>
+</html>

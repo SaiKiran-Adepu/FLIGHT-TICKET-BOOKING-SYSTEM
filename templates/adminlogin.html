@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>WELCOME ADMIN</title>
+    <link href="style.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    
+   
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+    body {
+        background-image: url('{{ url_for('static', filename='plane4.jpg') }}');
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-size: cover;
+    }
+</style>
+<center>
+    <form method="post" onsubmit="return login(this)" action="{{ url_for('admin_login_bp.admin_login') }}">
+        <fieldset style="width:30%">
+            <h3><center>ADMIN LOGIN</center></h3>
+            <hr>
+            <table>
+                <tr>
+                    <td>ADMIN NAME<font color="red">* </font>:</td>
+                    <td> <input type="text" name="namem" id="name" placeholder="ADMIN NAME" required></td>
+                </tr>
+                <tr>
+                    <td>ADMIN PASSWORD<font color="red">* </font>:</td>
+                    <td><input type="password" name="passm" id="pass" placeholder="ADMIN PASSWORD" required></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <input type="submit" value="Login" name="s1" class="btn-primary">
+                        <input type="reset" value="Reset" onclick="clearFunc()"class="btn-secondary">
+                        <a href="{{ url_for('home') }}"><input type="button" value="Back" class="btn-secondary"></a>
+                    </td>
+                </tr>
+            </table>
+        </fieldset>
+    </form>
+    <br>
+
+{% if error_message %}
+    <h3 style="color: red;">{{ error_message }}</h3><//directly error message without the another error page>
+{% endif %}
+</center>
+
+</body>
+</html>

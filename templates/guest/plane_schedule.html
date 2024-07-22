@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>PLANE SCHEDULE</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+           <style>
+            body {
+                background-image: url('/static/plane21.jpg');
+                background-repeat: no-repeat;
+                background-attachment: fixed;
+                background-size: cover;
+            }
+        </style>
+    </head>
+    <body>
+	<center>
+        <form method = "post" onSubmit="return login(this)" action = "Trainschb.jsp">
+            <fieldset style="width:23%">
+                <h3><center>PLANE SCHEDULE</center></h3>
+                <hr>
+                <table>
+                    <tr>
+                        <td>PLANE NUMBER:<font color="red">*</font>:</td>
+                        <td> <input type = "number" name = "trn" id="trn" Placeholder="PLANE NUMBER"></td>
+                    </tr>
+                   
+                    <tr>					
+                        <td></td>
+                        <td><input type = "submit" value="SCHEDULE" name = "s1" onClick ="login(this.form)" class="btn-primary">
+						<input type="reset" value="RESET" onclick="clearFunc()" class="btn-secondary">
+                        <a href="{{ url_for('home') }}"><INPUT TYPE="button" VALUE="Back" class="btn-secondary"></a>
+						
+						</td>
+                    </tr>
+                </table>
+            </fieldset>
+        </form>
+		<h3><font color="blue">THE PUBLIC USERS CAN VIEW SPECIFIC DETAILS OF A PLANE LIKE PLANE NUMBER PLANE NAME ORIGIN TO DESTINATION.</font></h3>
+        <br>
+		
+           </center>
+	</body>
+</html>

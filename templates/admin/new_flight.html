@@ -1,0 +1,144 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <script src="{{ url_for('static', filename='datetime.js') }}"></script>
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="alert alert-danger" role="alert">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    
+    <div id="header">
+        <h1>SKA AIRLINES</h1>
+        <h2><font color="orange">SAFE & HAPPY JOURNEY</font></h2>
+        <a href="{{ url_for('home') }}"><img src="{{ url_for('static', filename='home1.gif') }}"></a>
+    </div>
+
+    <table style="background:#FFFFFF; margin:0 auto;">
+        <tr>
+            <td width="300" valign="top" style="border-right:#666666 1px dotted;">
+                <div id="services">
+                    <h1>SKA AIRLINE ADMINS</h1><br>
+                    <ul>
+                        <li><font color="blue">SAI</font></li>
+                        <li><font color="#0066cc">SAI KIRAN</font></li>
+                        <li><font color="#0066cc">VANDANA</font></li>
+                        <li><font color="#0066cc">RAJITHA</font></li>
+                        <li><font color="#269900">RAMESH</font></li>
+                    </ul>
+                </div>
+                <div>
+                    <h2><font color="blue">Instructions to Admin While Adding a new Aeroplane</font></h2>
+                    <p>While adding a new Plane, Admins can also immediately add the same airports with fare in the add Airport fare with KM and Fare.</p>
+                    <p>Flight number is alphanumeric, like a 6-digit alphanumeric 1AA2BC.</p>
+                </div>
+            </td>
+            <td valign="top">
+                <div id="welcome" style="border-right:#666666 1px dotted;">
+                    <h1>NEW FLIGHT REGISTER</h1><br>
+                    <form name="F1" method="POST" action="{{ url_for('admin.new_flight_bp.add_new_plane') }}">
+                        <table cellspacing="5" cellpadding="3">
+                            <tr><td colspan="2"><font color="red">* Fields Mandatory</font></td></tr>
+                            <tr>
+                                <td>FLIGHT NUMBER<font color="red">*</font>:</td>
+                                <td><input type="text" name="flight_number" id="FLIGHTnumber" placeholder="FLIGHT NUMBER" required/></td>
+                            </tr>
+                            <tr>
+                                <td>FLIGHT NAME<font color="red">*</font>:</td>
+                                <td><input type="text" name="flight_name" id="FLIGHTname" placeholder="FLIGHT NAME" required/></td>
+                            </tr>
+                            <tr>
+                                <td>SELECT AIRPORT:</td>
+                                <td>
+                                    <input list="airports" name="selected_airport" id="airport2" placeholder="Select an airport">
+                                    <datalist id="airports">
+                                            {% for airport in airports %}
+                                                <option value="{{ airport.airport_name }}">{{ airport.airport_name }}</option>
+                                            {% endfor %}
+                                        </datalist>
+                                    <br>
+                                    <input type="button" value="Add Airport" onclick="addAirport()" class="btn-primary">
+                                
+                            </tr>
+                            <tr>
+                                <td>SELECTED AIRPORTS<font color="red">*</font>:</td>
+                                <td><input type="text" name="selected_airports" id="airportst" placeholder="SELECTED AIRPORTS" required/></td>
+                            </tr>
+                            <tr>
+                                <td>BASE FARE<font color="red">*</font>:</td>
+                                <td><input type="text" name="base_fare" id="bsf" placeholder="Base Fare" required/></td>
+                            </tr>
+                            <tr>
+                                <td>PLANE CLASS<font color="red" required>*</font>:<br/><br/></td>
+                                <td>
+                                    <input type="checkbox" id="1ac" name="first_class" value="FIRST CLASS,">
+                                    <label for="1ac">FIRST CLASS</label><br>
+                                    <input type="checkbox" id="2ac" name="business_class" value="BUSINESS CLASS,">
+                                    <label for="2ac">BUSINESS CLASS</label><br>
+                                    <input type="checkbox" id="3ac" name="premium_economy" value="PREMIUM ECONOMY,">
+                                    <label for="3ac">PREMIUM ECONOMY</label><br>
+                                    <input type="checkbox" id="CC" name="economy" value="ECONOMY,">
+                                    <label for="CC">ECONOMY</label><br>
+                                </td>
+                            </tr>
+                            <tr><td>PLANE QUOTA<font color="red">* </font>:<br/><br/></td><td>
+                                <input type="checkbox" id="gen" name="general" value="GENERAL,">
+                                <label for="gen">GENERAL</label><br>
+                                <input type="checkbox" id="ld" name="defence" value="DEFENCE,">
+                                <label for="ld">DEFENCE</label><br>
+                                <input type="checkbox" id="tkl" name="govt_employee" value="GOVT EMPLOYEE,">
+                                <label for="tkl">GOVT EMPLOYEE</label><br>
+                                <input type="checkbox" id="ptkl" name="senior_citizen" value="SENIOR CITIZEN,">
+                                <label for="ptkl">SENIOR CITIZEN</label><br>
+                                  <input type="checkbox" id="stn" name="student" value="STUDENT,">
+                                <label for="stn">STUDENT</label><br><br>
+                                                  </td></tr>
+                            <tr>
+                                <td>PLANE ADMIN<font color="red">*</font>:</td>
+                                {% if session.get('adm') %}
+                                <td><textarea rows="1" cols="15" name="adm" id="adm"  fixed readonly>{{ session['adm'] }}</textarea></td>
+                                {% endif %}
+                            </tr>
+
+                            <tr>
+                                <td>Date:</td>
+                                <td><textarea id="demo1" name="doa" rows1 cols=25  width="20"fixed readonly></textarea></td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <input type="submit" value="Add Flight" class="btn btn-primary">
+                                    <input type="reset" value="Clear" class="btn btn-secondary"> </br></br>
+                                    <button onclick="window.close()"" class="btn btn-secondary" values="close">CLOSE</button>
+                                </td>
+                            </tr>
+                        </table>
+                    </form>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+   
+    <script type="text/javascript">
+        function addAirport() {
+            var stationInput = document.getElementById('airport2');
+            var selectedStationsInput = document.getElementById('airportst');
+            if (selectedStationsInput.value !== '') {
+                selectedStationsInput.value += ',' + stationInput.value;
+            } else {
+                selectedStationsInput.value = stationInput.value;
+            }
+            stationInput.value = '';
+        }
+    </script>
+</body>
+</html>

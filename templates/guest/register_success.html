@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Success</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body onkeydown="return(event.keyCode == 154)">
+    <style>
+        body {
+            background-image: url('/static/plane6.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size:cover;
+        }
+    </style>
+    <center>
+<font color="white">
+    <h1>User Successfully Registered!</h1>
+    {% for user in user_details %}
+    
+        <h6>User Number:{{ user[0] }}</h6>
+        <h6>User Name:{{ user[1] }}</h6>
+        <h6>Password:{{ user[2] }}</h6>
+        <h6>Gender:{{ user[3] }}</h6>
+        <h6>Address:{{ user[4] }}</h6>
+        <h6>Mobile NUmber:{{ user[5] }}</h6>
+        <h6>ID Number:{{ user[8] }}</h6>
+        <h6>Date of Registration:{{ user[9] }}</h6>
+   
+    {% endfor %}
+    
+</font>
+    <button><a href="{{ url_for('guest_dashboard_bp.user_register') }}">Back to Dashboard</a></button>
+</center>
+</body>
+</html>
