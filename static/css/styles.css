@@ -1,0 +1,25 @@
+/* Custom styles for the responsive layout */
+
+.container {
+    margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    p {
+        font-size: 1rem;
+    }
+}
+
+/* Responsive images */
+img {
+    max-width: 100%;
+    height: auto;
+}
