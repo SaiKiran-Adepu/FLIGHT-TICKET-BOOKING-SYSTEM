@@ -1,0 +1,485 @@
+with origin and dest
+
+
+neat
+
+
+from flask import Blueprint, render_template, request, flash
+import mysql.connector
+
+seat_avl_bp = Blueprint('seat_avl_bp', __name__)
+
+# Database connection configuration
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'tiger',
+    'database': 'airline'
+}
+
+def get_db_connection():
+    """Establish and return a database connection."""
+    return mysql.connector.connect(**db_config)
+
+def check_seat_availability():
+    try:
+        # Example input data (you can modify this to get input from a form or another source)
+        origin = 'NEW DELHI-NDL'
+        destination = 'NEW YORK-NY'
+        journey_date = '24/Aug/2024'
+        target_class = 'FIRST CLASS'  # Specify the target class to filter
+
+        # Establish database connection
+        con = get_db_connection()
+        cursor = con.cursor()
+
+        # Define total seat numbers for each class
+        seat_layout = {
+            'FIRST CLASS': 12,  # Total seats in First Class
+            'BUSINESS CLASS': 8,  # Total seats in Business Class
+            'PREMIUM ECONOMY': 8,  # Total seats in Premium Economy
+            'ECONOMY': 12  # Total seats in Economy
+        }
+
+        # Query to get flight numbers and names for the given origin, destination, and date
+        flights_query = """
+            SELECT DISTINCT flight_Number, flight_Name
+            FROM airline_reservation
+            WHERE origin = %s AND dest = %s
+        """
+        cursor.execute(flights_query, (origin, destination,))
+        flights = cursor.fetchall()
+
+        if not flights:
+            print(f"No flights found from {origin} to {destination}.")
+            return
+
+        print("Available seats for FIRST CLASS flights from", origin, "to", destination, "on", journey_date)
+        print("="*50)
+
+        for flight in flights:
+            flight_number, flight_name = flight
+            print(f"\nFlight Number: {flight_number}")
+            print(f"Flight Name: {flight_name}")
+
+            # Get total seats and available seats for the specific class (FIRST CLASS)
+            if target_class in seat_layout:
+                total_seats = seat_layout[target_class]
+
+                # Query to get the count of booked seats for the selected flight, class, and journey date
+                booked_seats_query = """
+                    SELECT COUNT(seat_number) FROM airline_sitting 
+                    JOIN airline_reservation ON airline_sitting.PNR = airline_reservation.PNR
+                    WHERE airline_reservation.flight_Number = %s 
+                    AND airline_reservation.flight_Name = %s 
+                    AND airline_reservation.flight_class = %s 
+                    AND airline_reservation.jd = %s
+                """
+                cursor.execute(booked_seats_query, (flight_number, flight_name, target_class, journey_date))
+                booked_seats_count = cursor.fetchone()[0]
+
+                # Calculate the number of available seats
+                available_seats_count = total_seats - booked_seats_count
+
+                print(f"Class: {target_class}")
+                print(f"Available Seats: {available_seats_count}")
+
+    except Exception as ex:
+        # Handle exceptions and print an error message
+        print(f"Error: {ex}")
+
+    finally:
+        # Ensure the cursor and connection are closed
+        if cursor:
+            cursor.close()
+        if con:
+            con.close()
+
+if __name__ == "__main__":
+    check_seat_availability()
+
+
+
+
+
+from flask import Blueprint, render_template, request, flash
+import mysql.connector
+
+seat_avl_bp = Blueprint('seat_avl_bp', __name__)
+
+# Database connection configuration
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'tiger',
+    'database': 'airline'
+}
+
+def get_db_connection():
+    """Establish and return a database connection."""
+    return mysql.connector.connect(**db_config)
+
+def check_seat_availability():
+    try:
+        # Example input data (you can modify this to get input from a form or another source)
+        origin = 'NEW DELHI-NDL'
+        destination = 'NEW YORK-NY'
+        journey_date = '24/Aug/2024'
+
+        # Establish database connection
+        con = get_db_connection()
+        cursor = con.cursor()
+
+        # Define total seat numbers for each class
+        seat_layout = {
+            'FIRST CLASS': 12,  # Total seats in First Class
+            'BUSINESS CLASS': 8,  # Total seats in Business Class
+            'PREMIUM ECONOMY': 8,  # Total seats in Premium Economy
+            'ECONOMY': 12  # Total seats in Economy
+        }
+
+        # Query to get flight numbers and names for the given origin, destination, and date
+        flights_query = """
+            SELECT DISTINCT flight_Number, flight_Name
+            FROM airline_reservation
+            WHERE origin = %s AND dest = %s
+        """
+        cursor.execute(flights_query, (origin, destination))
+        flights = cursor.fetchall()
+
+        if not flights:
+            print(f"No flights found from {origin} to {destination}.")
+            return
+
+        print("Available seats for flights from", origin, "to", destination, "on", journey_date)
+        print("="*50)
+
+        for flight in flights:
+            flight_number, flight_name = flight
+            print(f"\nFlight Number: {flight_number}")
+            print(f"Flight Name: {flight_name}")
+
+            # Iterate through each seat class to get available seats
+            for flight_class in seat_layout:
+                total_seats = seat_layout[flight_class]
+
+                # Query to get the count of booked seats for the selected flight, class, and journey date
+                booked_seats_query = """
+                    SELECT COUNT(seat_number) FROM airline_sitting 
+                    JOIN airline_reservation ON airline_sitting.PNR = airline_reservation.PNR
+                    WHERE airline_reservation.flight_Number = %s 
+                    AND airline_reservation.flight_Name = %s 
+                    AND airline_reservation.flight_class = %s 
+                    AND airline_reservation.jd = %s
+                """
+                cursor.execute(booked_seats_query, (flight_number, flight_name, flight_class, journey_date))
+                booked_seats_count = cursor.fetchone()[0]
+
+                # Calculate the number of available seats
+                available_seats_count = total_seats - booked_seats_count
+
+                print(f"Class: {flight_class}")
+                print(f"Available Seats: {available_seats_count}")
+
+    except Exception as ex:
+        # Handle exceptions and print an error message
+        print(f"Error: {ex}")
+
+    finally:
+        # Ensure the cursor and connection are closed
+        if cursor:
+            cursor.close()
+        if con:
+            con.close()
+
+if __name__ == "__main__":
+    check_seat_availability()
+
+
+
+
+
+
+
+
+
+
+
+from flask import Blueprint, render_template, request, flash
+import mysql.connector
+from datetime import datetime
+
+seat_avl_bp = Blueprint('seat_avl_bp', __name__)
+
+# Database connection configuration
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'tiger',
+    'database': 'airline'
+}
+
+def get_db_connection():
+    """Establish and return a database connection."""
+    return mysql.connector.connect(**db_config)
+
+def check_seat_availability():
+    try:
+        # Example input data (you can modify this to get input from a form or another source)
+        origin = request.form['origin']
+        destination = request.form['dest']
+        #journey_date = '24/Aug/2024'
+        target_class = request.form['tycl']  # Specify the target class to filter
+        jd2=request.form['jd']
+
+        input_format = "%Y-%m-%d"
+        output_format = "%d/%b/%Y"
+        journey_date = datetime.strptime(jd2, input_format).strftime(output_format)
+
+        # Establish database connection
+        con = get_db_connection()
+        cursor = con.cursor()
+
+        # Define total seat numbers for each class
+        seat_layout = {
+            'FIRST CLASS': 12,  # Total seats in First Class
+            'BUSINESS CLASS': 8,  # Total seats in Business Class
+            'PREMIUM ECONOMY': 8,  # Total seats in Premium Economy
+            'ECONOMY': 12  # Total seats in Economy
+        }
+
+        # Query to get flight numbers and names for the given origin, destination, and date
+        flights_query = """
+            SELECT DISTINCT flight_Number, flight_Name
+            FROM airline_reservation
+            WHERE origin = %s AND dest = %s
+        """
+        cursor.execute(flights_query, (origin, destination,))
+        flights = cursor.fetchall()
+
+        if not flights:
+            print(f"No flights found from {origin} to {destination}.")
+            return
+
+        print("Available seats for FIRST CLASS flights from", origin, "to", destination, "on", journey_date)
+        print("="*50)
+
+        for flight in flights:
+            flight_number, flight_name = flight
+            print(f"\nFlight Number: {flight_number}")
+            print(f"Flight Name: {flight_name}")
+
+            # Get total seats and available seats for the specific class (FIRST CLASS)
+            if target_class in seat_layout:
+                total_seats = seat_layout[target_class]
+
+                # Query to get the count of booked seats for the selected flight, class, and journey date
+                booked_seats_query = """
+                    SELECT COUNT(seat_number) FROM airline_sitting 
+                    JOIN airline_reservation ON airline_sitting.PNR = airline_reservation.PNR
+                    WHERE airline_reservation.flight_Number = %s 
+                    AND airline_reservation.flight_Name = %s 
+                    AND airline_reservation.flight_class = %s 
+                    AND airline_reservation.jd = %s
+                """
+                cursor.execute(booked_seats_query, (flight_number, flight_name, target_class, journey_date))
+                booked_seats_count = cursor.fetchone()[0]
+
+                # Calculate the number of available seats
+                available_seats_count = total_seats - booked_seats_count
+
+                print(f"Class: {target_class}")
+                print(f"Available Seats: {available_seats_count}")
+
+    except Exception as ex:
+        # Handle exceptions and print an error message
+        print(f"Error: {ex}")
+
+    finally:
+        # Ensure the cursor and connection are closed
+        if cursor:
+            cursor.close()
+        if con:
+            con.close()
+
+if __name__ == "__main__":
+    check_seat_availability()
+
+at runtime
+from flask import Blueprint, render_template, request, flash
+import mysql.connector
+
+seat_avl_bp = Blueprint('seat_avl_bp', __name__)
+
+# Database connection configuration
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'tiger',
+    'database': 'airline'
+}
+
+def get_db_connection():
+    """Establish and return a database connection."""
+    return mysql.connector.connect(**db_config)
+
+def check_seat_availability():
+    try:
+        # Example input data (you can modify this to get input from a form or another source)
+        origin = 'NEW DELHI-NDL'
+        destination = 'NEW YORK-NY'
+        journey_date = '24/Aug/2024'
+        target_class = 'FIRST CLASS'  # Specify the target class to filter
+
+        # Establish database connection
+        con = get_db_connection()
+        cursor = con.cursor()
+
+        # Define total seat numbers for each class
+        seat_layout = {
+            'FIRST CLASS': 12,  # Total seats in First Class
+            'BUSINESS CLASS': 8,  # Total seats in Business Class
+            'PREMIUM ECONOMY': 8,  # Total seats in Premium Economy
+            'ECONOMY': 12  # Total seats in Economy
+        }
+
+        # Query to get flight numbers and names for the given origin, destination, and date
+        flights_query = """
+            SELECT DISTINCT flight_Number, flight_Name
+            FROM airline_reservation
+            WHERE origin = %s AND dest = %s
+        """
+        cursor.execute(flights_query, (origin, destination,))
+        flights = cursor.fetchall()
+
+        if not flights:
+            print(f"No flights found from {origin} to {destination}.")
+            return
+
+        print("Available seats for FIRST CLASS flights from", origin, "to", destination, "on", journey_date)
+        print("="*50)
+
+        for flight in flights:
+            flight_number, flight_name = flight
+            print(f"\nFlight Number: {flight_number}")
+            print(f"Flight Name: {flight_name}")
+
+            # Get total seats and available seats for the specific class (FIRST CLASS)
+            if target_class in seat_layout:
+                total_seats = seat_layout[target_class]
+
+                # Query to get the count of booked seats for the selected flight, class, and journey date
+                booked_seats_query = """
+                    SELECT COUNT(seat_number) FROM airline_sitting 
+                    JOIN airline_reservation ON airline_sitting.PNR = airline_reservation.PNR
+                    WHERE airline_reservation.flight_Number = %s 
+                    AND airline_reservation.flight_Name = %s 
+                    AND airline_reservation.flight_class = %s 
+                    AND airline_reservation.jd = %s
+                """
+                cursor.execute(booked_seats_query, (flight_number, flight_name, target_class, journey_date))
+                booked_seats_count = cursor.fetchone()[0]
+
+                # Calculate the number of available seats
+                available_seats_count = total_seats - booked_seats_count
+
+                print(f"Class: {target_class}")
+                print(f"Available Seats: {available_seats_count}")
+
+    except Exception as ex:
+        # Handle exceptions and print an error message
+        print(f"Error: {ex}")
+
+    finally:
+        # Ensure the cursor and connection are closed
+        if cursor:
+            cursor.close()
+        if con:
+            con.close()
+
+if __name__ == "__main__":
+    check_seat_availability()
+
+
+
+
+with number and name
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+import mysql.connector
+from datetime import datetime
+
+seat_avl_bp = Blueprint('seat_avl_bp', __name__)
+
+# Database connection configuration
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'tiger',
+    'database': 'airline'
+}
+
+def get_db_connection():
+    """Establish and return a database connection."""
+    return mysql.connector.connect(**db_config)
+
+@seat_avl_bp.route('/admin/ticket_admin', methods=['GET', 'POST'])
+def seat_avl():
+    if request.method == 'POST':
+        try:
+            # Hardcoded values (replace these with actual form data retrieval)
+            fn = 'AA12II'
+            fnn = 'SKA AIRLINES'
+            fc = 'FIRST CLASS'
+            jd = '24/Aug/2024'  # Example of a hardcoded date
+
+            # Establish database connection
+            con = get_db_connection()
+            cursor = con.cursor()
+
+            # Define the total number of seats for each class
+            seat_layout = {
+                'FIRST CLASS': 12,
+                'BUSINESS CLASS': 8,
+                'PREMIUM ECONOMY': 8,
+                'ECONOMY': 12
+            }
+
+            # Calculate available seats based on total seats minus booked seats
+            if fc in seat_layout:
+                total_seats = seat_layout[fc]
+
+                # Query to count the number of booked seats
+                booked_seats_query = """
+                    SELECT COUNT(*) FROM airline_sitting
+                    WHERE flight_Number=%s AND flight_Name=%s AND flight_class=%s AND jd=%s
+                """
+                cursor.execute(booked_seats_query, (fn, fnn, fc, jd))
+                booked_seats = cursor.fetchone()[0]
+
+                # Calculate available seats
+                available_seats = total_seats - booked_seats
+
+                # Flash the number of available seats and render the template
+                flash(f'{available_seats} seats available in {fc} for flight {fn} on {jd}.')
+                return render_template('admin/ticket_admintt.html', available_seats=available_seats, flight_class=fc)
+            else:
+                flash(f'Seat availability check for {fc} is not implemented.')
+                return redirect(url_for('admin.seat_avl_bp.seat_avl'))
+
+        except Exception as ex:
+            # Handle exceptions and flash an error message
+            print(f"Error: {ex}")
+            flash('An error occurred while processing your request. Please try again.')
+            return redirect(url_for('admin.seat_avl_bp.seat_avl'))
+
+        finally:
+            # Ensure the cursor and connection are closed
+            if cursor:
+                cursor.close()
+            if con:
+                con.close()
+
+    # Render the form for seat availability checking
+    return render_template('admin/ticket_admin.html')
+

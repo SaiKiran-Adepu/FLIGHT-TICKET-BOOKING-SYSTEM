@@ -1,0 +1,58 @@
+
+this query trigger for if the journey date that complteds it updates status as completed the journey easy to admn side for PNR or booking enquiry
+
+
+
+
+
+SET GLOBAL event_scheduler = ON;
+
+
+CREATE EVENT IF NOT EXISTS update_journey_status
+ON SCHEDULE EVERY 1 DAY
+DO
+  UPDATE airline_reservation
+  SET status = 'completed'
+  WHERE STR_TO_DATE(jd, '%d/%b/%Y') <= CURDATE() AND status != 'completed';
+
+
+for both if its a one way or round trip then status of journey is auto updates to complete based on the system date
+
+CREATE EVENT IF NOT EXISTS update_journey_status
+ON SCHEDULE EVERY 1 DAY
+DO
+  UPDATE airline_reservation
+  SET jstatus = 'completed'
+  WHERE (STR_TO_DATE(jd, '%d/%b/%Y') <= CURDATE() AND (rd IS NULL OR rd = ''))
+     OR (STR_TO_DATE(rd, '%d/%b/%Y') <= CURDATE() AND jstatus != 'completed');
+
+want to se the trigger SHOW EVENTS FROM airline;
+
+
+this is dynamic trigger for handle both jd rd with ticket cacellation date on can_on coulm
+
+DELIMITER //
+
+CREATE EVENT IF NOT EXISTS update_journey_status
+ON SCHEDULE EVERY 1 DAY
+DO
+BEGIN
+    -- Update jstatus to 'completed' if journey or return date has passed
+    UPDATE airline_reservation
+    SET jstatus = 'completed'
+    WHERE ((STR_TO_DATE(jd, '%d/%b/%Y') <= CURDATE() AND (rd IS NULL OR rd = ''))
+       OR (STR_TO_DATE(rd, '%d/%b/%Y') <= CURDATE()))
+      AND jstatus != 'completed'
+      AND jstatus != 'canceled';
+
+    -- Update jstatus to 'canceled' if a ticket is canceled before the journey or return date
+    UPDATE airline_reservation
+    SET jstatus = 'canceled'
+    WHERE (STR_TO_DATE(can_on, '%d/%b/%Y') <= CURDATE())
+      AND jstatus != 'completed';
+END //
+
+DELIMITER ;
+
+
+

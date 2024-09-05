@@ -1,0 +1,89 @@
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+import mysql.connector
+from datetime import datetime
+
+seats_avl_bp = Blueprint('seats_avl_bp', __name__)
+
+# Database connection configuration
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'tiger',
+    'database': 'airline'
+}
+
+def get_db_connection():
+    """Establish and return a database connection."""
+    return mysql.connector.connect(**db_config)
+
+@seats_avl_bp.route('/admin/ticket_admin', methods=['GET', 'POST'])
+def seats_avl():
+    if request.method == 'POST':
+        try:
+            # Get form data
+            fn = 'AA12AA'
+            fnn = 'SKA AIRLINES'
+            fc = 'FIRST CLASS'
+            jd2 = '22/Aug/2024'
+
+            # Format the journey date to match the database format
+            #input_format = "%Y-%m-%d"
+            #output_format = "%d/%b/%Y"
+            #jd = datetime.strptime(jd2, input_format).strftime(output_format)
+
+            # Establish database connection
+            con = get_db_connection()
+            cursor = con.cursor()
+
+            # Define total seat numbers for each class
+            seat_layout = {
+                'FIRST CLASS': ['1A', '1B', '1C', '1D', '2A', '2B', '2C', '2D', '3A', '3B', '3C', '3D'],
+                'BUSINESS CLASS': ['4A', '4B', '4C', '4D', '5A', '5B', '5C', '5D'],
+                'PREMIUM ECONOMY': ['6A', '6B', '6C', '6D', '7A', '7B', '7C', '7D'],
+                'ECONOMY': ['8A', '8B', '8C', '8D', '9A', '9B', '9C', '9D', '10A', '10B', '10C', '10D']
+            }
+            
+            if fc in seat_layout:
+                total_seats = seat_layout[fc]
+
+                # Query to get the booked seats for the selected flight and journey date
+                booked_seats_query = """
+                    SELECT seat_number FROM airline_sitting 
+                    JOIN airline_reservation ON airline_sitting.PNR = airline_reservation.PNR
+                    WHERE airline_reservation.flight_Number = %s 
+                    AND airline_reservation.flight_Name = %s 
+                    AND airline_reservation.flight_class = %s 
+                    AND airline_reservation.jd = %s
+                """
+                cursor.execute(booked_seats_query, (fn, fnn, fc, jd2))
+                booked_seats = [row[0] for row in cursor.fetchall()]
+
+                # Determine available seats by subtracting booked seats from total seats
+                available_seats = [seat for seat in total_seats if seat not in booked_seats]
+
+                # Return seat availability information
+                if available_seats:
+                    flash(f'{len(available_seats)} seats available in {fc}.')
+                else:
+                    flash(f'No seats available in {fc}.')
+            else:
+                flash(f'Seat availability check for {fc} is not implemented.')
+
+            # Render the page with seat availability information
+            return render_template('admin/ticket_admintt.html', available_seats=available_seats, flight_class=fc)
+
+        except Exception as ex:
+            # Handle exceptions and flash error message
+            print(f"Error: {ex}")
+            flash('An error occurred while processing your request. Please try again.')
+            return redirect(url_for('seats_avl_bp.seats_avl'))
+
+        finally:
+            # Ensure the cursor and connection are closed
+            if cursor:
+                cursor.close()
+            if con:
+                con.close()
+
+    # Render the form for seat availability checking
+    return render_template('admin/ticket_admin1.html')

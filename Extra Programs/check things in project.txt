@@ -1,0 +1,151 @@
+
+
+
+hello
+
+at last if the MySQL server not started the it will display like your not started the MySQL Db server    
+
+
+
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+import mysql.connector
+
+ticket_index_bp = Blueprint('ticket_index_bp', __name__)
+
+# Database connection configuration
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'tiger',
+    'database': 'airline'
+}
+
+def get_db_connection():
+    return mysql.connector.connect(**db_config)
+
+@ticket_index_bp.route('/guest/ticket_index', methods=['GET', 'POST'])
+def ticket_index():
+    if request.method == 'POST':
+        try:
+            # Get form data
+            origin = request.form['origin']
+            dest = request.form['dest']
+            tycl = request.form['tycl']
+            tyt = request.form['tyt']
+            tm = request.form['tm']
+
+            # Database operations
+            con = get_db_connection()
+            cursor = con.cursor()
+
+            # Check for flights
+            flight_query = """
+                SELECT * FROM flights 
+                WHERE FIND_IN_SET(%s, airports) AND FIND_IN_SET(%s, airports) 
+                AND FIND_IN_SET(%s, class) AND FIND_IN_SET(%s, ticket_type)
+            """
+            cursor.execute(flight_query, (origin, dest, tycl, tyt))
+            flights = cursor.fetchall()
+
+            if flights:
+                # Check for fares
+                fare_query = """
+                    SELECT fare, km FROM airplane_fare 
+                    WHERE FIND_IN_SET(%s, airport) AND FIND_IN_SET(%s, airport) > 0 
+                    LIMIT 1
+                """
+                cursor.execute(fare_query, (origin, dest))
+                fare_result = cursor.fetchone()
+
+                cursor.close()
+                con.close()
+
+                if fare_result:
+                    base_fare = fare_result[0]
+                    km = fare_result[1]
+                    additional_charge = 0
+                    tatkal_charge = 0
+                    tm=0
+
+
+
+                    # Calculate additional charges based on class
+                    if tycl == "FIRST CLASS":
+                        additional_charge = 1500
+                    elif tycl == "BUSINESS CLASS":
+                        additional_charge = 2500
+                    elif tycl == "PREMIUM ECONOMY":
+                        additional_charge = 1600
+                    elif tycl == "ECONOMY":
+                        additional_charge = 800
+
+                    base_fare += additional_charge
+
+                    # Calculate additional charges based on ticket type
+                    if tyt == "REGULAR":
+                        tatkal_charge = 0
+                    elif tyt == "DEFENCE":
+                        base_fare -= 1000
+                        tatkal_charge = -1000
+                    elif tyt == "GOVT EMPLOYEE":
+                        base_fare -= 500
+                        tatkal_charge = -500
+                    elif tyt == "SENIOR CITIZEN":
+                        base_fare -= 600
+                        tatkal_charge = -600
+                    elif tyt == "STUDENT":
+                        base_fare -= 600
+                        tatkal_charge = -600
+
+                if tm=="ONE WAY":
+                    tm=0
+                elif tm=="ROUND TRIP":
+                    tm=base_fare*2
+
+                    return render_template(
+                        'guest/ticket_index_su.html', 
+                        flights=flights, 
+                        base_fare=base_fare,
+                        additional_charge=additional_charge,
+                        tatkal_charge=tatkal_charge,
+                        tm=tm,
+                        km=km
+                    )
+                else:
+                    error_message = 'No fares found for the selected route.'
+                    flash(error_message)
+                    return redirect(url_for('guest.ticket_index_bp.ticket_index'))
+            else:
+                cursor.close()
+                con.close()
+                error_message = 'No flights found for the selected route.'
+                flash(error_message)
+                return redirect(url_for('guest.ticket_index_bp.ticket_index'))
+
+        except Exception as ex:
+            print(ex)
+            error_message = 'An error occurred while processing your request. Please try again.'
+            flash(error_message)
+            return redirect(url_for('guest.ticket_index_bp.ticket_index'))
+    
+    return render_template('guest/ticket_index.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                      

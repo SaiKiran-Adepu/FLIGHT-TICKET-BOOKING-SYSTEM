@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>International Airline Ticket</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+        .ticket-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        .ticket-header, .ticket-footer {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .ticket-header img {
+            width: 100px;
+        }
+        .ticket-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .flight-route {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin: 20px 0;
+        }
+        .flight-route img {
+            width: 50px;
+        }
+        .flight-route .location {
+            flex: 1;
+            text-align: center;
+        }
+        .ticket-details {
+            width: 100%;
+        }
+        .ticket-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .ticket-details th, .ticket-details td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .ticket-details th {
+            background-color: #f8f8f8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ticket-container">
+    <div class="ticket-header">
+        <img src="path/to/logo.png" alt="Airline Logo">
+        <h1>Flight Ticket</h1>
+    </div>
+
+    <div class="ticket-body">
+        <div class="flight-route">
+            <div class="location">
+                <h2>Origin</h2>
+                <p id="origin">New York (JFK)</p>
+            </div>
+            <img src="path/to/plane.png" alt="Plane Icon">
+            <div class="location">
+                <h2>Destination</h2>
+                <p id="destination">London (LHR)</p>
+            </div>
+        </div>
+
+        <div class="ticket-details">
+            <table>
+                <tr>
+                    <th>Passenger Name</th>
+                    <td id="passenger-name">John Doe</td>
+                </tr>
+                <tr>
+                    <th>Flight Number</th>
+                    <td id="flight-number">AA100</td>
+                </tr>
+                <tr>
+                    <th>Date</th>
+                    <td id="flight-date">2024-08-01</td>
+                </tr>
+                <tr>
+                    <th>Departure Time</th>
+                    <td id="departure-time">10:00 AM</td>
+                </tr>
+                <tr>
+                    <th>Arrival Time</th>
+                    <td id="arrival-time">10:00 PM</td>
+                </tr>
+                <tr>
+                    <th>Seat Number</th>
+                    <td id="seat-number">12A</td>
+                </tr>
+                <tr>
+                    <th>Class</th>
+                    <td id="class">Business</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="ticket-footer">
+        <p>Thank you for choosing our airline. Have a pleasant flight!</p>
+    </div>
+</div>
+
+<script>
+    // Example of dynamic content insertion
+    document.getElementById('origin').textContent = 'Los Angeles (LAX)';
+    document.getElementById('destination').textContent = 'Tokyo (NRT)';
+    document.getElementById('passenger-name').textContent = 'Jane Smith';
+    document.getElementById('flight-number').textContent = 'JL123';
+    document.getElementById('flight-date').textContent = '2024-08-15';
+    document.getElementById('departure-time').textContent = '2:00 PM';
+    document.getElementById('arrival-time').textContent = '6:00 PM';
+    document.getElementById('seat-number').textContent = '15B';
+    document.getElementById('class').textContent = 'Economy';
+</script>
+
+</body>
+</html>

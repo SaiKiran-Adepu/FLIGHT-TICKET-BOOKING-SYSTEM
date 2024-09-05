@@ -1,0 +1,201 @@
+project/
+├── app.py
+├── config.py
+├── models/
+│   ├── _init_.py
+│   ├── user.py
+│   ├── booking.py
+│   ├── admin.py
+│   ├── pnr.py
+│   └── ...
+├── routes/
+│   ├── _init_.py
+│   ├── user_routes.py
+│   ├── admin_routes.py
+│   ├── booking_routes.py
+│   ├── index_routes.py
+│   ├── pnr_routes.py
+│   └── ...
+├── templates/
+│   ├── index.html
+│   ├── user_login.html
+│   ├── admin_login.html
+│   ├── booking.html
+│   └── pnr_details.html
+└── static/
+    └── images/
+        ├── train11.jpg
+        └── qr.jpg
+
+correct PS
+
+project_directory/
+├── app.py
+├── config.py
+├── run.py
+├── templates/
+│   ├── index.html
+│   ├── user_login.html
+│   ├── adminlogin.html
+│   ├── booking.html
+│   └── pnr_details.html
+├── static/
+│   └── (static files like CSS, JS, images)
+├── user/
+│   ├── __init__.py
+│   ├── routes.py
+│   └── forms.py
+├── admin/
+│   ├── __init__.py
+│   ├── routes.py
+│   └── forms.py
+└── models.py
+
+
+project_directory/
+├── app.py
+├── static/
+│   └── csst.css
+├── templates/
+│   ├── index.html
+│   ├── adminlogin.html
+│   ├── admin_pnr_enq.html
+│   └── admin_new_plane.html
+└── admin/
+    ├── __init__.py
+    ├── adminlogin.py
+    ├── admin_pnr.py
+    └── admin_newplane.py
+
+
+now 
+airline/
+│
+├── admin/
+│   ├── __init__.py
+│   ├── admin_login.py
+│   ├── admin_pnr.py
+│   ├── admin_newplane.py
+│
+├── static/
+│   ├── plane2.jpg
+│   ├── plane4.jpg
+│   ├── datetime.js
+│   └── csst.css
+│
+├── templates/
+│   ├── admin/
+│   │   ├── welcome_admin.html
+│   │   └── adminlogin.html
+│   ├── index.html
+│
+├── user/
+│   ├── __init__.py
+│   ├── routes.py
+│
+├── airline.py
+├── __init__.py
+└── requirements.txt
+
+
+
+correct one
+
+airline/
+├── admin/
+│   ├── __init__.py
+│   ├── admin_login.py
+│   ├── admin_pnr.py
+│   ├── admin_newplane.py
+├── static/
+│   ├── plane2.jpg
+│   ├── plane4.jpg
+│   ├── datetime.js
+│   └── csst.css
+├── templates/
+│   ├── admin/
+│   │   ├── welcome_admin.html
+│   ├── adminlogin.html
+│   ├── index.html
+├── user/
+│   ├── __init__.py
+│   ├── routes.py
+├── airline.py
+└── requirements.txt
+
+
+interpolation o=in python 
+<h1>Welcome, {{ adname }}</h1>
+
+{% if error_message %}
+    <p style="color: red;">{{ error_message }}</p>
+{% endif %}
+
+<script type="text/javascript" src="{{ url_for('static', filename='datetime.js') }}"></script>
+
+<a href="{{ url_for('admin_login_bp.admin_login') }}">ADMIN LOGIN</a>
+
+ <a href="{{ url_for('logout') }}">
+        <img src="{{ url_for('static', filename='lo3.png') }}" width="28" height="22" alt="logout" name="logout">
+    </a>
+
+to prevent back after logout 
+<script type="text/javascript">
+        // Disable browser back button
+        history.pushState(null, null, document.URL);
+        window.addEventListener('popstate', function () {
+            history.pushState(null, null, document.URL);
+        });
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+from flask import Blueprint, render_template, request, session
+from admin.utils import login_required
+import mysql.connector
+
+admin_login_bp = Blueprint('admin_login_bp', __name__)
+
+# Database connection configuration
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'tiger',
+    'database': 'airline'
+}
+
+# Function to get database connection
+def get_db_connection():
+    return mysql.connector.connect(**db_config)
+
+# Route to handle admin login form
+@admin_login_bp.route('/login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        adname = request.form['namem']
+        adpass = request.form['passm']
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        query = "SELECT * FROM airline_Admins WHERE admin_name = %s AND admin_pass = %s"
+        cursor.execute(query, (adname, adpass))
+        admin = cursor.fetchone()
+
+        if admin:
+            session['adm'] = adname
+            return render_template('admin/welcome_admin.html', adname=adname)
+        else:
+            error_message = 'Invalid credentials. Please try again.'
+            return render_template('adminlogin.html', error_message=error_message)
+
+    return render_template('adminlogin.html')
+
+

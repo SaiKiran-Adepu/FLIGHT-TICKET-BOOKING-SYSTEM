@@ -1,0 +1,37 @@
+The Admin side ticket cancellation is completed then now focus on the date related things that not with html forms direct with python code admin side done pending at user side and guest/Index
+
+
+
+next reduce the ticket download that common to the CNF and CAN tickets with same program and with a js code that if the cancellation 
+ticket details empty then those will in hidden if those contain a data then it will visible at admin side ticket download
+and user side total user journey history/print or view
+
+done
+
+and the at admin side total feedbacks that will reduce the or connect with delete feedback
+done
+
+
+and next at admin side the funds that need to link with SKA AIRLINES with SKA BANK AC
+when any tickets book then amount need to add to the bank AC not debit like cancellation 
+or make a separate ska-airlines table that hold trno pnr date etc if not just connect to ska bank
+
+
+
+
+
+from datetime import datetime
+
+now = datetime.now()
+            # Format the date and time with AM/PM
+            dott = now.strftime('%d/%b/%Y %I:%M:%S %p') 
+
+
+
+datetime
+
+
+
+
+and display the available seats that are in a flight here session is not working ang by origin and destination also
+for this use like auto fetching the details that a common program like fetching use number

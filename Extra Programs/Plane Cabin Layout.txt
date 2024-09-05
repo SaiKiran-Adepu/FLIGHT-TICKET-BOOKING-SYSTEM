@@ -1,0 +1,38 @@
+Airline Cabin Layout Diagram
+1. First Class (Rows 1-3):
+
+Seating Configuration: 2x2
+Seat Numbers: 1A, 1B, 1C, 1D; 2A, 2B, 2C, 2D; 3A, 3B, 3C, 3D
+Spacing: Extra spacious with luxurious amenities.
+Color: Gold
+2. Business Class (Rows 4-10):
+
+Seating Configuration: 2x3x2
+Seat Numbers:
+Row 4: 4A, 4B, 4C, 4D, 4E, 4F
+Row 5: 5A, 5B, 5C, 5D, 5E, 5F
+Row 6: 6A, 6B, 6C, 6D, 6E, 6F
+Row 7: 7A, 7B, 7C, 7D, 7E, 7F
+Row 8: 8A, 8B, 8C, 8D, 8E, 8F
+Row 9: 9A, 9B, 9C, 9D, 9E, 9F
+Row 10: 10A, 10B, 10C, 10D, 10E, 10F
+Spacing: Comfortable, with slightly narrower seats than First Class.
+Color: Blue
+3. Premium Economy (Rows 11-14):
+
+Seating Configuration: 2x4x2
+Seat Numbers:
+Row 11: 11A, 11B, 11C, 11D, 11E, 11F, 11G
+Row 12: 12A, 12B, 12C, 12D, 12E, 12F, 12G
+Row 13: 13A, 13B, 13C, 13D, 13E, 13F, 13G
+Row 14: 14A, 14B, 14C, 14D, 14E, 14F, 14G
+Spacing: Standard, with moderate legroom.
+Color: Green
+4. Economy Class (Rows 15-40):
+
+Seating Configuration: 3x3x3
+Seat Numbers:
+Rows 15-40: Seat numbers range from 15A to 40I, following the same pattern in each row.
+Spacing: Compact, with the most seats per row.
+Color: Gray
+This layout organizes the cabin by class, clearly delineating different sections of the plane. Each class is color-coded for easy identification, and the seat numbering follows standard airline conventions. You can sketch this layout or use a digital design tool to create a visual representation.

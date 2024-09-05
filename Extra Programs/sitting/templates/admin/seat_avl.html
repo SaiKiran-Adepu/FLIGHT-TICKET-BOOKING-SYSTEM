@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Availability</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+    
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+        textarea {
+            resize: none;
+        }
+        
+        table tr:not(:first-child) {
+            cursor: pointer;
+            transition: all .25s ease-in-out;
+        }
+        table tr:not(:first-child):hover {
+            background-color: #F0FFF0;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <h2><font color="green">Flight Search Results</font></h2>
+        <table border="3" bgcolor="orange" height="10" width="1700" id="table">
+            <tr>
+                <th>Flight Number</th>
+                <th>Flight Name</th>
+                <th>Class</th>
+                <th>Date</th>
+                <th>Check</th>
+            </tr>
+            <!-- Example flight row (this should be dynamically generated) -->
+            <tr>
+                <td>AA12AA</td>
+                <td>SKA AIRLINES</td>
+                <td>FIRST CLASS</td>
+                <td>24/Aug/2024</td>
+                <td>Select to view Seats<button hidden class="check-btn">Check Availability </button></td>
+            </tr>
+            <tr>
+                <td>AA12II</td>
+                <td>SKA AIRLINES</td>
+                <td>FIRST CLASS</td>
+                <td>24/Aug/2024</td>
+                <td>Select to view Seats<button hidden class="check-btn">Check Availability </button></td>
+            </tr>
+        </table>
+        <div id="results"></div>
+        <h1>Seat Availability</h1>
+        <form id="seat-avail-form">
+            <label for="flight_number">Flight Number:</label>
+            <input type="text" id="flight_number" name="flight_number" readonly>
+            <label for="flight_name">Flight Name:</label>
+            <input type="text" id="flight_name" name="flight_name" readonly>
+            <label for="flight_class">Flight Class:</label>
+            <input type="text" id="flight_class" name="flight_class" readonly>
+            <label for="date">Journey Date:</label>
+            <input type="text" id="date" name="date" readonly>
+            <button type="submit">Check Availability</button>
+        </form>
+        
+    </center>
+
+    <script>
+        $(document).ready(function() {
+            $('#seat-avail-form').submit(function(event) {
+                event.preventDefault();
+
+                $.ajax({
+                    url: '/admin/seat_avl',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        flight_number: $('#flight_number').val(),
+                        flight_name: $('#flight_name').val(),
+                        flight_class: $('#flight_class').val(),
+                        date: $('#date').val()
+                    }),
+                    success: function(response) {
+                        let resultsHtml = '<h2>Seat Availability</h2>';
+                        $.each(response, function(flightClass, availableSeats) {
+                            resultsHtml += `<p>${flightClass}: ${availableSeats} seats available</p>`;
+                        });
+                        $('#results').html(resultsHtml);
+                    },
+                    error: function(xhr) {
+                        $('#results').html('<p>An error occurred: ' + xhr.responseJSON.error + '</p>');
+                    }
+                });
+            });
+
+            // Populate form fields and submit on row click
+            $('#table').on('click', 'tr', function() {
+                var $row = $(this);
+                if ($row.find('button').length === 0) return;  // Skip rows without the button
+
+                $('#flight_number').val($row.find('td').eq(0).text());
+                $('#flight_name').val($row.find('td').eq(1).text());
+                $('#flight_class').val($row.find('td').eq(2).text());
+                $('#date').val($row.find('td').eq(3).text());
+
+                // Submit the form
+                $('#seat-avail-form').submit();
+            });
+        });
+    </script>
+</body>
+</html>

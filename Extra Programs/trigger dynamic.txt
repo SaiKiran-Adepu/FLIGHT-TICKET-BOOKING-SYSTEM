@@ -1,0 +1,328 @@
+This Trigger allocates the seat based on the flight_number classs and date ans status
+if the status=CNF then that seat allocates at end of class reaches end its good for family/group booking they got all seats at together
+
+
+DELIMITER $$
+
+CREATE TRIGGER `allocate_seat_number` 
+BEFORE INSERT ON `airline_sitting` 
+FOR EACH ROW 
+BEGIN
+    DECLARE seat_prefix_list TEXT;
+    DECLARE next_seat VARCHAR(10);
+    DECLARE seat_count INT;
+    DECLARE total_seats INT;
+    DECLARE class_type VARCHAR(20);
+    DECLARE journey_date VARCHAR(20);
+    DECLARE canceled_seat VARCHAR(10);
+    DECLARE passengers_count INT;
+    DECLARE current_passenger INT;
+
+    -- Fetch the flight class and journey date for the PNR
+    SELECT flight_class, jd 
+    INTO class_type, journey_date 
+    FROM airline_reservation 
+    WHERE PNR = NEW.PNR;
+
+    -- Determine the seat prefix list based on the flight class
+    IF class_type = 'FIRST CLASS' THEN
+        SET seat_prefix_list = '1A,1B,1C,1D,2A,2B,2C,2D,3A,3B,3C,3D';
+    ELSEIF class_type = 'BUSINESS CLASS' THEN
+        SET seat_prefix_list = '4A,4B,4C,4D,4E,4F,5A,5B,5C,5D,5E,5F,6A,6B,6C,6D,6E,6F,7A,7B,7C,7D,7E,7F,8A,8B,8C,8D,8E,8F,9A,9B,9C,9D,9E,9F,10A,10B,10C,10D,10E,10F';
+    ELSEIF class_type = 'PREMIUM ECONOMY' THEN
+        SET seat_prefix_list = '11A,11B,11C,11D,11E,11F,11G,12A,12B,12C,12D,12E,12F,12G,13A,13B,13C,13D,13E,13F,13G,14A,14B,14C,14D,14E,14F,14G';
+    ELSEIF class_type = 'ECONOMY' THEN
+        SET seat_prefix_list = '15A,15B,15C,15D,15E,15F,15G,15H,15I,16A,16B,16C,16D,16E,16F,16G,16H,16I,17A,17B,17C,17D,17E,17F,17G,17H,17I,18A,18B,18C,18D,18E,18F,18G,18H,18I,19A,19B,19C,19D,19E,19F,19G,19H,19I,20A,20B,20C,20D,20E,20F,20G,20H,20I,21A,21B,21C,21D,21E,21F,21G,21H,21I,22A,22B,22C,22D,22E,22F,22G,22H,22I,23A,23B,23C,23D,23E,23F,23G,23H,23I,24A,24B,24C,24D,24E,24F,24G,24H,24I,25A,25B,25C,25D,25E,25F,25G,25H,25I,26A,26B,26C,26D,26E,26F,26G,26H,26I,27A,27B,27C,27D,27E,27F,27G,27H,27I,28A,28B,28C,28D,28E,28F,28G,28H,28I,29A,29B,29C,29D,29E,29F,29G,29H,29I,30A,30B,30C,30D,30E,30F,30G,30H,30I,31A,31B,31C,31D,31E,31F,31G,31H,31I,32A,32B,32C,32D,32E,32F,32G,32H,32I,33A,33B,33C,33D,33E,33F,33G,33H,33I,34A,34B,34C,34D,34E,34F,34G,34H,34I,35A,35B,35C,35D,35E,35F,35G,35H,35I,36A,36B,36C,36D,36E,36F,36G,36H,36I,37A,37B,37C,37D,37E,37F,37G,37H,37I,38A,38B,38C,38D,38E,38F,38G,38H,38I,39A,39B,39C,39D,39E,39F,39G,39H,39I,40A,40B,40C,40D,40E,40F,40G,40H,40I';
+    END IF;
+
+    -- Determine the number of passengers for the current PNR
+    SELECT COUNT(*)
+    INTO passengers_count
+    FROM airline_sitting
+    WHERE PNR = NEW.PNR;
+
+    -- Set the current passenger count (0-indexed)
+    SET current_passenger = passengers_count;
+
+    -- Count the number of seats already allocated for this flight, class, and journey date
+    SELECT COUNT(*)
+    INTO seat_count
+    FROM airline_sitting AS s
+    JOIN airline_reservation AS r ON s.PNR = r.PNR
+    WHERE r.flight_number = (SELECT flight_number FROM airline_reservation WHERE PNR = NEW.PNR)
+    AND r.flight_class = class_type
+    AND r.jd = journey_date;
+
+    -- Determine the total number of seats in the seat prefix list
+    SET total_seats = LENGTH(seat_prefix_list) - LENGTH(REPLACE(seat_prefix_list, ',', '')) + 1;
+
+    -- If all seats are occupied, look for a canceled seat
+    IF seat_count = total_seats THEN
+        -- Check for any canceled seat for the same flight, class, and journey date
+        SELECT s.seat_number
+        INTO canceled_seat
+        FROM airline_sitting AS s
+        JOIN airline_reservation AS r ON s.PNR = r.PNR
+        WHERE r.flight_number = (SELECT flight_number FROM airline_reservation WHERE PNR = NEW.PNR)
+        AND r.flight_class = class_type
+        AND r.jd = journey_date
+        AND r.status = 'CAN'
+        LIMIT current_passenger, 1;
+
+        -- If a canceled seat is found for the current passenger, assign it
+        IF canceled_seat IS NOT NULL THEN
+            SET NEW.seat_number = canceled_seat;
+        ELSE
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No more seats available in this class.';
+        END IF;
+    ELSE
+        -- Get the next available seat for the current passenger
+        SELECT SUBSTRING_INDEX(SUBSTRING_INDEX(seat_prefix_list, ',', ((seat_count + current_passenger) % total_seats) + 1), ',', -1)
+        INTO next_seat;
+
+        -- If no seat available, raise an error
+        IF next_seat IS NULL THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No more seats available in this class.';
+        ELSE
+            -- Assign the calculated seat number to the new row
+            SET NEW.seat_number = next_seat;
+        END IF;
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+Airline Cabin Layout Diagram
+1. First Class (Rows 1-3):
+
+Seating Configuration: 2x2
+Seat Numbers: 1A, 1B, 1C, 1D; 2A, 2B, 2C, 2D; 3A, 3B, 3C, 3D
+Spacing: Extra spacious with luxurious amenities.
+Color: Gold
+2. Business Class (Rows 4-10):
+
+Seating Configuration: 2x3x2
+Seat Numbers:
+Row 4: 4A, 4B, 4C, 4D, 4E, 4F
+Row 5: 5A, 5B, 5C, 5D, 5E, 5F
+Row 6: 6A, 6B, 6C, 6D, 6E, 6F
+Row 7: 7A, 7B, 7C, 7D, 7E, 7F
+Row 8: 8A, 8B, 8C, 8D, 8E, 8F
+Row 9: 9A, 9B, 9C, 9D, 9E, 9F
+Row 10: 10A, 10B, 10C, 10D, 10E, 10F
+Spacing: Comfortable, with slightly narrower seats than First Class.
+Color: Blue
+3. Premium Economy (Rows 11-14):
+
+Seating Configuration: 2x4x2
+Seat Numbers:
+Row 11: 11A, 11B, 11C, 11D, 11E, 11F, 11G
+Row 12: 12A, 12B, 12C, 12D, 12E, 12F, 12G
+Row 13: 13A, 13B, 13C, 13D, 13E, 13F, 13G
+Row 14: 14A, 14B, 14C, 14D, 14E, 14F, 14G
+Spacing: Standard, with moderate legroom.
+Color: Green
+4. Economy Class (Rows 15-40):
+
+Seating Configuration: 3x3x3
+Seat Numbers:
+Rows 15-40: Seat numbers range from 15A to 40I, following the same pattern in each row.
+Spacing: Compact, with the most seats per row.
+Color: Gray
+This layout organizes the cabin by class, clearly delineating different sections of the plane. Each class is color-coded for easy identification, and the seat numbering follows standard airline conventions. You can sketch this layout or use a digital design tool to create a visual representation.
+
+
+
+
+
+not working
+
+CREATE TRIGGER `allocate_seat_number` BEFORE INSERT ON `airline_sitting` FOR EACH ROW 
+BEGIN
+    DECLARE seat_prefix_list TEXT;
+    DECLARE next_seat VARCHAR(10);
+    DECLARE seat_count INT;
+    DECLARE total_seats INT;
+    DECLARE seats_available VARCHAR(255);
+
+    -- Determine the seat prefix list based on the flight class
+    IF (SELECT flight_class FROM airline_reservation WHERE PNR = NEW.PNR) = 'FIRST CLASS' THEN
+        SET seat_prefix_list = '1A,1B,1C,1D,2A,2B,2C,2D,3A,3B,3C,3D';
+    ELSEIF (SELECT flight_class FROM airline_reservation WHERE PNR = NEW.PNR) = 'BUSINESS CLASS' THEN
+        SET seat_prefix_list = '4A,4B,4C,4D,4E,4F,5A,5B,5C,5D,5E,5F,6A,6B,6C,6D,6E,6F,7A,7B,7C,7D,7E,7F,8A,8B,8C,8D,8E,8F,9A,9B,9C,9D,9E,9F,10A,10B,10C,10D,10E,10F';
+    ELSEIF (SELECT flight_class FROM airline_reservation WHERE PNR = NEW.PNR) = 'PREMIUM ECONOMY' THEN
+        SET seat_prefix_list = '11A,11B,11C,11D,11E,11F,11G,12A,12B,12C,12D,12E,12F,12G,13A,13B,13C,13D,13E,13F,13G,14A,14B,14C,14D,14E,14F,14G';
+    ELSEIF (SELECT flight_class FROM airline_reservation WHERE PNR = NEW.PNR) = 'ECONOMY' THEN
+        SET seat_prefix_list = '15A,15B,15C,15D,15E,15F,15G,15H,15I,16A,16B,16C,16D,16E,16F,16G,16H,16I,17A,17B,17C,17D,17E,17F,17G,17H,17I,18A,18B,18C,18D,18E,18F,18G,18H,18I,19A,19B,19C,19D,19E,19F,19G,19H,19I,20A,20B,20C,20D,20E,20F,20G,20H,20I,21A,21B,21C,21D,21E,21F,21G,21H,21I,22A,22B,22C,22D,22E,22F,22G,22H,22I,23A,23B,23C,23D,23E,23F,23G,23H,23I,24A,24B,24C,24D,24E,24F,24G,24H,24I,25A,25B,25C,25D,25E,25F,25G,25H,25I,26A,26B,26C,26D,26E,26F,26G,26H,26I,27A,27B,27C,27D,27E,27F,27G,27H,27I,28A,28B,28C,28D,28E,28F,28G,28H,28I,29A,29B,29C,29D,29E,29F,29G,29H,29I,30A,30B,30C,30D,30E,30F,30G,30H,30I,31A,31B,31C,31D,31E,31F,31G,31H,31I,32A,32B,32C,32D,32E,32F,32G,32H,32I,33A,33B,33C,33D,33E,33F,33G,33H,33I,34A,34B,34C,34D,34E,34F,34G,34H,34I,35A,35B,35C,35D,35E,35F,35G,35H,35I,36A,36B,36C,36D,36E,36F,36G,36H,36I,37A,37B,37C,37D,37E,37F,37G,37H,37I,38A,38B,38C,38D,38E,38F,38G,38H,38I,39A,39B,39C,39D,39E,39F,39G,39H,39I,40A,40B,40C,40D,40E,40F,40G,40H,40I';
+    END IF;
+
+    -- Get list of available seats
+    SET seats_available = seat_prefix_list;
+    
+    -- Remove already allocated or canceled seats from the list
+    SET seats_available = REPLACE(seats_available, (SELECT GROUP_CONCAT(seat_number) 
+                                                    FROM airline_sitting 
+                                                    WHERE PNR = NEW.PNR 
+                                                    AND flight_class = (SELECT flight_class 
+                                                                        FROM airline_reservation 
+                                                                        WHERE PNR = NEW.PNR)), '');
+
+    -- Determine the next seat in sequence
+    SET next_seat = SUBSTRING_INDEX(seats_available, ',', 1);
+
+    -- If all seats are taken, or if next_seat is NULL, assign the next available seat from cancellations
+    IF next_seat IS NULL THEN
+        SET next_seat = (SELECT seat_number FROM airline_sitting 
+                         WHERE flight_class = (SELECT flight_class FROM airline_reservation WHERE PNR = NEW.PNR)
+                         AND flight_number = (SELECT flight_number FROM airline_reservation WHERE PNR = NEW.PNR)
+                         AND jd = (SELECT jd FROM airline_reservation WHERE PNR = NEW.PNR)
+                         AND status = 'CAN'
+                         ORDER BY seat_number ASC LIMIT 1);
+    END IF;
+
+    -- Assign the calculated seat number to the new row
+    SET NEW.seat_number = next_seat;
+END;
+
+
+
+
+DELIMITER //
+DELIMITER //
+
+CREATE TRIGGER allocate_seat_number BEFORE INSERT ON airline_sitting 
+FOR EACH ROW 
+BEGIN
+    DECLARE seat_prefix_list TEXT;
+    DECLARE next_seat VARCHAR(10);
+    DECLARE seats_available TEXT;
+
+    -- Determine the seat prefix list based on the flight class
+    IF (SELECT flight_class FROM airline_reservation WHERE PNR = NEW.PNR) = 'FIRST CLASS' THEN
+        SET seat_prefix_list = '1A,1B,1C,1D,2A,2B,2C,2D,3A,3B,3C,3D';
+    ELSEIF (SELECT flight_class FROM airline_reservation WHERE PNR = NEW.PNR) = 'BUSINESS CLASS' THEN
+        SET seat_prefix_list = '4A,4B,4C,4D,4E,4F,5A,5B,5C,5D,5E,5F,6A,6B,6C,6D,6E,6F,7A,7B,7C,7D,7E,7F,8A,8B,8C,8D,8E,8F,9A,9B,9C,9D,9E,9F,10A,10B,10C,10D,10E,10F';
+    ELSEIF (SELECT flight_class FROM airline_reservation WHERE PNR = NEW.PNR) = 'PREMIUM ECONOMY' THEN
+        SET seat_prefix_list = '11A,11B,11C,11D,11E,11F,12A,12B,12C,12D,12E,12F,13A,13B,13C,13D,13E,13F,14A,14B,14C,14D,14E,14F';
+    ELSEIF (SELECT flight_class FROM airline_reservation WHERE PNR = NEW.PNR) = 'ECONOMY' THEN
+        SET seat_prefix_list = '15A,15B,15C,15D,15E,15F,16A,16B,16C,16D,16E,16F,17A,17B,17C,17D,17E,17F,18A,18B,18C,18D,18E,18F,19A,19B,19C,19D,19E,19F,20A,20B,20C,20D,20E,20F,21A,21B,21C,21D,21E,21F,22A,22B,22C,22D,22E,22F,23A,23B,23C,23D,23E,23F,24A,24B,24C,24D,24E,24F,25A,25B,25C,25D,25E,25F,26A,26B,26C,26D,26E,26F,27A,27B,27C,27D,27E,27F,28A,28B,28C,28D,28E,28F,29A,29B,29C,29D,29E,29F,30A,30B,30C,30D,30E,30F,31A,31B,31C,31D,31E,31F,32A,32B,32C,32D,32E,32F,33A,33B,33C,33D,33E,33F,34A,34B,34C,34D,34E,34F,35A,35B,35C,35D,35E,35F,36A,36B,36C,36D,36E,36F,37A,37B,37C,37D,37E,37F,38A,38B,38C,38D,38E,38F,39A,39B,39C,39D,39E,39F,40A,40B,40C,40D,40E,40F';
+    END IF;
+
+    -- Get list of available seats
+    SET seats_available = seat_prefix_list;
+
+    -- Remove already allocated seats from the list
+    SET seats_available = (SELECT GROUP_CONCAT(seat_number SEPARATOR ',')
+                           FROM airline_sitting
+                           WHERE seat_number IN (seat_prefix_list)
+                           AND PNR = NEW.PNR);
+
+    -- Determine the next seat in sequence
+    SET next_seat = SUBSTRING_INDEX(seats_available, ',', 1);
+
+    -- If all seats are taken, or if next_seat is NULL, assign the next available seat from cancellations
+    IF next_seat IS NULL THEN
+        SET next_seat = (SELECT seat_number FROM airline_sitting 
+                         WHERE flight_class = (SELECT flight_class FROM airline_reservation WHERE PNR = NEW.PNR)
+                         AND flight_number = (SELECT flight_number FROM airline_reservation WHERE PNR = NEW.PNR)
+                         AND jd = (SELECT jd FROM airline_reservation WHERE PNR = NEW.PNR)
+                         AND status = 'CAN'
+                         ORDER BY seat_number ASC LIMIT 1);
+    END IF;
+
+    -- Assign the calculated seat number to the new row
+    SET NEW.seat_number = next_seat;
+END//
+
+DELIMITER ;
+
+
+
+
+worked
+DELIMITER $$
+
+CREATE TRIGGER `allocate_seat_number`
+BEFORE INSERT ON `airline_sitting`
+FOR EACH ROW
+BEGIN
+    DECLARE seat_prefix_list TEXT;
+    DECLARE next_seat VARCHAR(10);
+    DECLARE seat_count INT;
+    DECLARE total_seats INT;
+    DECLARE class_type VARCHAR(20);
+    DECLARE journey_date VARCHAR(20);
+    DECLARE canceled_seat VARCHAR(10);
+    DECLARE seat_seq INT;
+
+    -- Fetch the flight class and journey date for the PNR
+    SELECT flight_class, jd 
+    INTO class_type, journey_date 
+    FROM airline_reservation 
+    WHERE PNR = NEW.PNR;
+
+    -- Determine the seat prefix list based on the flight class
+    IF class_type = 'FIRST CLASS' THEN
+        SET seat_prefix_list = '1A,1B,1C,1D,2A,2B,2C,2D,3A,3B,3C,3D';
+    ELSEIF class_type = 'BUSINESS CLASS' THEN
+        SET seat_prefix_list = '4A,4B,4C,4D,4E,4F,5A,5B,5C,5D,5E,5F,6A,6B,6C,6D,6E,6F,7A,7B,7C,7D,7E,7F,8A,8B,8C,8D,8E,8F,9A,9B,9C,9D,9E,9F,10A,10B,10C,10D,10E,10F';
+    ELSEIF class_type = 'PREMIUM ECONOMY' THEN
+        SET seat_prefix_list = '11A,11B,11C,11D,11E,11F,11G,12A,12B,12C,12D,12E,12F,12G,13A,13B,13C,13D,13E,13F,13G,14A,14B,14C,14D,14E,14F,14G';
+    ELSEIF class_type = 'ECONOMY' THEN
+        SET seat_prefix_list = '15A,15B,15C,15D,15E,15F,15G,15H,15I,16A,16B,16C,16D,16E,16F,16G,16H,16I,17A,17B,17C,17D,17E,17F,17G,17H,17I,18A,18B,18C,18D,18E,18F,18G,18H,18I,19A,19B,19C,19D,19E,19F,19G,19H,19I,20A,20B,20C,20D,20E,20F,20G,20H,20I,21A,21B,21C,21D,21E,21F,21G,21H,21I,22A,22B,22C,22D,22E,22F,22G,22H,22I,23A,23B,23C,23D,23E,23F,23G,23H,23I,24A,24B,24C,24D,24E,24F,24G,24H,24I,25A,25B,25C,25D,25E,25F,25G,25H,25I,26A,26B,26C,26D,26E,26F,26G,26H,26I,27A,27B,27C,27D,27E,27F,27G,27H,27I,28A,28B,28C,28D,28E,28F,28G,28H,28I,29A,29B,29C,29D,29E,29F,29G,29H,29I,30A,30B,30C,30D,30E,30F,30G,30H,30I,31A,31B,31C,31D,31E,31F,31G,31H,31I,32A,32B,32C,32D,32E,32F,32G,32H,32I,33A,33B,33C,33D,33E,33F,33G,33H,33I,34A,34B,34C,34D,34E,34F,34G,34H,34I,35A,35B,35C,35D,35E,35F,35G,35H,35I,36A,36B,36C,36D,36E,36F,36G,36H,36I,37A,37B,37C,37D,37E,37F,37G,37H,37I,38A,38B,38C,38D,38E,38F,38G,38H,38I,39A,39B,39C,39D,39E,39F,39G,39H,39I,40A,40B,40C,40D,40E,40F,40G,40H,40I';
+    END IF;
+
+    -- Find the next available seat for this PNR, class, and journey date
+    -- Get the total number of seats
+    SET total_seats = LENGTH(seat_prefix_list) - LENGTH(REPLACE(seat_prefix_list, ',', '')) + 1;
+
+    -- Determine the seat count already allocated for the PNR
+    SELECT COUNT(*)
+    INTO seat_count
+    FROM airline_sitting
+    WHERE PNR = NEW.PNR;
+
+    -- If there are already allocated seats, find the next seat
+    IF seat_count > 0 THEN
+        -- Find the last allocated seat
+        SELECT seat_number
+        INTO next_seat
+        FROM airline_sitting
+        WHERE PNR = NEW.PNR
+        ORDER BY seat_number DESC
+        LIMIT 1;
+
+        -- Calculate the next seat in the sequence
+        SET seat_seq = FIND_IN_SET(next_seat, seat_prefix_list) + 1;
+        
+        -- If the seat_seq exceeds the total seats, start from the beginning
+        IF seat_seq > total_seats THEN
+            SET seat_seq = 1;
+        END IF;
+        
+        -- Get the next seat
+        SET NEW.seat_number = SUBSTRING_INDEX(SUBSTRING_INDEX(seat_prefix_list, ',', seat_seq), ',', -1);
+
+    ELSE
+        -- If no seats are allocated yet, get the first seat from the list
+        SET NEW.seat_number = SUBSTRING_INDEX(seat_prefix_list, ',', 1);
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+
+
+
+
+
+

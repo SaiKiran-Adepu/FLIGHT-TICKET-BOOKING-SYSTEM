@@ -1,0 +1,153 @@
+mix
+
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+import mysql.connector
+from datetime import datetime
+
+ticket_admin_bp = Blueprint('ticket_admin_bp', __name__)
+
+# Database connection configuration
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'tiger',
+    'database': 'airline'
+}
+
+def get_db_connection():
+    return mysql.connector.connect(**db_config)
+
+@ticket_admin_bp.route('/admin/ticket_admin', methods=['GET', 'POST'])
+def ticket_admin():
+    if request.method == 'POST':
+        try:
+            # Get form data
+            origin = request.form['origin']
+            dest = request.form['dest']
+            tycl = request.form['tycl']
+            tyt = request.form['tyt']
+            tm = request.form['tm']
+            jd2 = request.form['jd']
+            rd2 = request.form.get('rd', '').strip()
+
+            # Convert dates to the desired format
+            input_format = "%Y-%m-%d"
+            output_format = "%d/%b/%Y"
+            jd = datetime.strptime(jd2, input_format).strftime(output_format)
+            rd = datetime.strptime(rd2, input_format).strftime(output_format) if rd2 else None
+
+            # Database operations
+            con = get_db_connection()
+            cursor = con.cursor(dictionary=True)
+
+            # Check for flights
+            flight_query = """
+                SELECT flight_number, flight_name FROM flights
+                WHERE origin = %s AND destination = %s
+                AND class = %s AND ticket_type = %s
+            """
+            cursor.execute(flight_query, (origin, dest, tycl, tyt))
+            flights = cursor.fetchall()
+
+            # Initialize variables for the response
+            flights_info = []
+            base_fare = 0
+            class_charge = 0
+            total_fare = 0
+            quota_discount = 0
+            km = 0
+            available_seats = 0
+
+            if flights:
+                # Check for fares
+                fare_query = """
+                    SELECT fare, km FROM airplane_fare
+                    WHERE origin = %s AND destination = %s
+                    LIMIT 1
+                """
+                cursor.execute(fare_query, (origin, dest))
+                fare_result = cursor.fetchone()
+
+                if fare_result:
+                    base_fare, km = fare_result
+
+                    # Calculate additional charges based on class
+                    class_charge = {
+                        "FIRST CLASS": 1500,
+                        "BUSINESS CLASS": 2500,
+                        "PREMIUM ECONOMY": 1600,
+                        "ECONOMY": 800
+                    }.get(tycl, 0)
+
+                    # Apply charges
+                    total_fare = base_fare + class_charge
+
+                    # Calculate additional charges based on ticket type
+                    quota_discount = {
+                        "GENERAL": 0,
+                        "DEFENCE": -1000,
+                        "GOVT EMPLOYEE": -500,
+                        "SENIOR CITIZEN": -600,
+                        "STUDENT": -600
+                    }.get(tyt, 0)
+
+                    total_fare += quota_discount
+
+                    # Apply trip mode
+                    if tm == "ROUND TRIP":
+                        total_fare *= 2
+                        total_fare -= total_fare * 0.01  # 1% discount
+
+                    # Define the total number of seats for each class
+                    seat_layout = {
+                        'FIRST CLASS': 12,
+                        'BUSINESS CLASS': 8,
+                        'PREMIUM ECONOMY': 8,
+                        'ECONOMY': 12
+                    }
+
+                    # Calculate available seats
+                    total_seats = seat_layout.get(tycl, 0)
+                    if total_seats:
+                        # Join airline_reservation and airline_sitting to count booked seats
+                        booked_seats_query = """
+                            SELECT COUNT(*) FROM airline_sitting AS s
+                            JOIN airline_reservation AS r
+                            ON s.PNR = r.PNR
+                            WHERE r.origin = %s AND r.dest = %s
+                            AND s.flight_class = %s
+                            AND r.jd = %s
+                        """
+                        cursor.execute(booked_seats_query, (origin, dest, tycl, jd))
+                        booked_seats = cursor.fetchone()[0]
+                        available_seats = total_seats - booked_seats
+
+                    flights_info = flights  # Save flight info to be displayed
+                else:
+                    flash('No fares found for the selected route.')
+            else:
+                flash('No flights found for the selected route.')
+
+            cursor.close()
+            con.close()
+
+            return render_template(
+                'admin/ticket_admin1.html',
+                flights=flights_info,
+                base_fare=base_fare,
+                class_charge=class_charge,
+                total_fare=total_fare,
+                quota_discount=quota_discount,
+                km=km,
+                trip_mode=tm,
+                journey_date=jd,
+                return_date=rd,
+                available_seats=available_seats
+            )
+        except Exception as ex:
+            print(f"Error: {ex}")
+            flash('An error occurred while processing your request. Please try again.')
+            return redirect(url_for('admin.ticket_admin_bp.ticket_admin'))
+
+    return render_template('admin/ticket_admin.html')

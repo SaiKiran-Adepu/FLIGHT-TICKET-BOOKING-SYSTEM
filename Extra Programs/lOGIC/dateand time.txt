@@ -1,0 +1,34 @@
+Python code to current date and time code
+
+from datetime import datetime
+now = datetime.now()
+            # Format the date and time with AM/PM
+            dott = now.strftime('%d/%b/%Y %I:%M:%S %p')
+
+
+
+To capture the current date and time with AM or PM in Python, you can use the datetime module. Here's an example code snippet that demonstrates how to do this:
+
+python
+Copy code
+from datetime import datetime
+
+# Capture the current date and time
+now = datetime.now()
+
+# Format the date and time with AM/PM
+current_time = now.strftime('%d/%b/%Y %I:%M:%S %p')
+
+# Use the variable as needed
+nt = request.form.get('acn', '').strip()
+print(current_time)  # Example output: "15/Aug/2024 04:28:45 PM"
+In this code:
+
+%d: Day of the month as a zero-padded decimal number.
+%b: Abbreviated month name.
+%Y: Year with century as a decimal number.
+%I: Hour (12-hour clock) as a zero-padded decimal number.
+%M: Minute as a zero-padded decimal number.
+%S: Second as a zero-padded decimal number.
+%p: AM or PM.
+You can use the current_time variable anywhere in your Flask application just like you would with nt.

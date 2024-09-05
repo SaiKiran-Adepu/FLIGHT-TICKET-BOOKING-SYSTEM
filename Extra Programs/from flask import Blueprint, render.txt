@@ -1,0 +1,189 @@
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+import mysql.connector
+from datetime import datetime
+
+ticket_admin_bp = Blueprint('ticket_admin_bp', __name__)
+
+# Database connection configuration
+db_config = {
+    'host': 'localhost',
+    'username': 'root',
+    'password': 'tiger',
+    'database': 'airline'
+}
+
+def get_db_connection():
+    return mysql.connector.connect(**db_config)
+
+@ticket_admin_bp.route('/admin/ticket_admin', methods=['GET', 'POST'])
+def ticket_admin():
+    if request.method == 'POST':
+        try:
+            # Get form data
+available_seats = None
+    fc = None
+    fn = None
+    fnn = None
+    jd = None
+            origin = request.form['origin']
+            dest = request.form['dest']
+            tycl = request.form['tycl']
+            tyt = request.form['tyt']
+            tm=request.form['tm']
+            jd2=request.form['jd']
+            rd2 = request.form.get('rd', '').strip()
+
+            input_format = "%Y-%m-%d"
+            output_format = "%d/%b/%Y"
+            jd = datetime.strptime(jd2, input_format).strftime(output_format)
+            rd = datetime.strptime(rd2, input_format).strftime(output_format) if rd2 else None
+
+            # Database operations
+            con = get_db_connection()
+            cursor = con.cursor()
+
+            # Check for flights
+            flight_query = """
+                SELECT * FROM flights 
+                WHERE FIND_IN_SET(%s, airports) AND FIND_IN_SET(%s, airports) 
+                AND FIND_IN_SET(%s, class) AND FIND_IN_SET(%s, ticket_type)
+            """
+            cursor.execute(flight_query, (origin, dest, tycl, tyt))
+            flights = cursor.fetchall()
+
+            if flights:
+                # Check for fares
+                fare_query = """
+                    SELECT fare, km FROM airplane_fare 
+                    WHERE FIND_IN_SET(%s, airport) AND FIND_IN_SET(%s, airport) > 0 
+                    LIMIT 1
+                """
+                cursor.execute(fare_query, (origin, dest))
+                fare_result = cursor.fetchone()
+
+                cursor.close()
+                con.close()
+
+                if fare_result:
+                    base_fare = fare_result[0]
+                    km = fare_result[1]
+                    class_charge = 0
+                    quuota_discount = 0
+
+                    # Calculate additional charges based on class
+                    if tycl == "FIRST CLASS":
+                        class_charge = 1500
+                    elif tycl == "BUSINESS CLASS":
+                        class_charge = 2500
+                    elif tycl == "PREMIUM ECONOMY":
+                        class_charge = 1600
+                    elif tycl == "ECONOMY":
+                        class_charge = 800
+                    bs=base_fare
+                    bs += class_charge #with adding class charges 
+
+                    # Calculate additional charges based on ticket type
+                    if tyt == "GENERAL":
+                        quuota_discount = 0
+                    elif tyt == "DEFENCE":
+                        
+                        quuota_discount = -1000
+                    elif tyt == "GOVT EMPLOYEE":
+                       
+                        quuota_discount = -500
+                    elif tyt == "SENIOR CITIZEN":
+                       
+                        quuota_discount = -600
+                    elif tyt == "STUDENT":
+                        quuota_discount = -600
+                    tf = bs + quuota_discount # with subtraction of quota   
+                    
+                       # Calculating the trip mode, if one way total fare = total fare, if round trip total fare = total fare * 2
+                    tmf = tf
+                    tmf1 = 0
+                    if tm == "ROUND TRIP":
+                        tmf = tf * 2
+                        tmf1 = tmf * 0.01
+                        tmf -= tmf1
+                        base_fare=base_fare=base_fare=base_fare*2
+                        quuota_discount=quuota_discount*2
+                        class_charge=class_charge*2
+
+
+ # Define the total number of seats for each class
+            seat_layout = {
+                'FIRST CLASS': 12,
+                'BUSINESS CLASS': 8,
+                'PREMIUM ECONOMY': 8,
+                'ECONOMY': 12
+            }
+
+            if fc in seat_layout:
+                total_seats = seat_layout[fc]
+
+                # Query to count the number of booked seats
+                booked_seats_query = """
+                    SELECT COUNT(*) FROM airline_sitting
+                    WHERE flight_Number=%s AND flight_Name=%s AND flight_class=%s AND jd=%s
+                """
+                cursor.execute(booked_seats_query, (fn, fnn, fc, jd))
+                booked_seats = cursor.fetchone()[0]
+
+                # Calculate available seats
+                available_seats = total_seats - booked_seats
+            else:
+                flash(f'Seat availability check for {fc} is not implemented.')
+
+        except Exception as ex:
+            print(f"Error: {ex}")
+            flash('An error occurred while processing your request. Please try again.')
+        finally:
+            if cursor:
+                cursor.close()
+            if con:
+                con.close()
+
+                        
+
+                    return render_template(
+                        'admin/ticket_admin1.html',
+                        flights=flights, 
+                        base_fare=base_fare,
+                        class_charge=class_charge,
+                        tf=tf,
+                        quuota_discount=quuota_discount,
+                        km=km,
+                        tm=tm,
+                        jd=jd,
+                        rd=rd,
+                        tmf1=tmf1,
+                        tmf=tmf,available_seats=available_seats,
+                           fc=fc
+                    )
+                else:
+                    error_message = 'No fares found for the selected route.'
+                    flash(error_message)
+                    return redirect(url_for('admin.ticket_admin_bp.ticket_admin'))
+            else:
+                cursor.close()
+                con.close()
+                error_message = 'No flights found for the selected route.'
+                flash(error_message)
+                return redirect(url_for('admin.ticket_admin_bp.ticket_admin'))
+
+        except Exception as ex:
+            print(ex)
+            error_message = 'An error occurred while processing your request. Please try again.'
+            flash(error_message)
+            return redirect(url_for('admin.ticket_admin_bp.ticket_admin'))
+    
+    return render_template('admin/ticket_admin.html')
+
+
+
+
+
+
+
+
+        

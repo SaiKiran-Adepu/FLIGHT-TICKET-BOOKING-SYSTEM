@@ -1,0 +1,166 @@
+good logic with flight number and name
+
+html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Availability</title>
+</head>
+<body>
+    <h1>Seat Availability Check</h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+    <!-- Form for seat availability -->
+    <form method="post" action="{{ url_for('admin.seat_avl_bp.seat_avl') }}">
+        <h2>Check Seat Availability</h2>
+        <label for="flight_number">Flight Number:</label>
+        <input type="text" name="flight_number" id="fnr1" placeholder="Flight Number" required>
+        <label for="flight_name">Flight Name:</label>
+        <input type="text" name="flight_name" id="fnn1" placeholder="Flight Name" required>
+        <label for="flight_class">Flight Class:</label>
+        <input type="text" name="flight_class" id="fc" placeholder="Flight Class" required>
+        <label for="jd">Date (YYYY-MM-DD):</label>
+        <input type="text" name="jd" id="jd" placeholder="Date" required><br><br>
+        <input type="submit" value="Check Availability">
+    </form>
+</body>
+</html>
+
+
+
+.py
+
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+import mysql.connector
+
+seat_avl_bp = Blueprint('seat_avl_bp', __name__)
+
+# Database connection configuration
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'tiger',
+    'database': 'airline'
+}
+
+def get_db_connection():
+    """Establish and return a database connection."""
+    return mysql.connector.connect(**db_config)
+
+@seat_avl_bp.route('/admin/seat_avl', methods=['GET', 'POST'])
+def seat_avl():
+    cursor = None
+    con = None
+    available_seats = None
+    fc = None
+    fn = None
+    fnn = None
+    jd = None
+    rd = None
+
+    try:
+        if request.method == 'POST':
+            # Get form data from the HTML form
+            fn = request.form.get('flight_number', '')
+            fnn = request.form.get('flight_name', '')
+            fc = request.form.get('flight_class', '')
+            jd = request.form.get('jd', '')
+            rd = request.form.get('rd', '')
+
+            # Establish database connection
+            con = get_db_connection()
+            cursor = con.cursor()
+
+            # Define the total number of seats for each class
+            seat_layout = {
+                'FIRST CLASS': 12,
+                'BUSINESS CLASS': 8,
+                'PREMIUM ECONOMY': 8,
+                'ECONOMY': 12
+            }
+
+            # Calculate available seats based on total seats minus booked seats
+            if fc in seat_layout:
+                total_seats = seat_layout[fc]
+
+                # Query to count the number of booked seats
+                booked_seats_query = """
+                    SELECT COUNT(*) FROM airline_sitting
+                    WHERE flight_Number=%s AND flight_Name=%s AND flight_class=%s AND jd=%s
+                """
+                cursor.execute(booked_seats_query, (fn, fnn, fc, jd))
+                booked_seats = cursor.fetchone()[0]
+
+                # Calculate available seats
+                available_seats = total_seats - booked_seats
+            else:
+                flash(f'Seat availability check for {fc} is not implemented.')
+
+    except Exception as ex:
+        # Handle exceptions and flash an error message
+        print(f"Error: {ex}")
+        flash('An error occurred while processing your request. Please try again.')
+        return redirect(url_for('admin.seat_avl_bp.seat_avl'))
+
+    finally:
+        # Ensure the cursor and connection are closed
+        if cursor:
+            cursor.close()
+        if con:
+            con.close()
+
+    # Render the form for seat availability checking with previous data
+    return render_template('admin/seat_avl_su.html',
+                           available_seats=available_seats,
+                           fc=fc,
+                           fn=fn,
+                           fnn=fnn,
+                           jd=jd,
+                           rd=rd)
+
+
+and success
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seat Availability Result</title>
+</head>
+<body>
+    <h1>Seat Availability Result</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    {% if available_seats is not none %}
+        <h2>Available Seats:</h2>
+        <p>{{ available_seats }} seats available in {{ fc }}.</p>
+    {% else %}
+        <p>No seats available or invalid class.</p>
+    {% endif %}
+
+    <a href="{{ url_for('admin.seat_avl_bp.seat_avl') }}">Check Another Flight</a>
+</body>
+</html>

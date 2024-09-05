@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Airline Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script>
+        function swapText() {
+            var textBox1Value = document.getElementById("train1").value;
+            var textBox2Value = document.getElementById("train2").value;
+            document.getElementById("train1").value = textBox2Value;
+            document.getElementById("train2").value = textBox1Value;
+        }
+    </script>
+    <script>
+        function login(form) {
+            var t1 = document.getElementById("train1").value;
+            var t2 = document.getElementById("train2").value;
+            var doj = document.getElementById("doj").value;
+            var tyc = document.getElementById("tyc").value;
+            var tyb = document.getElementById("tyt").value;
+            if (t1 == '') {
+                alert("Please Select Origin");
+                return false;
+            } else if (t2 == '') {
+                alert("Please select Destination");
+                return false;
+            } else if (document.F1.train1.value == document.F1.train2.value) {
+                alert("Your Selected Same Airports!");
+                document.F1.train2.focus();
+                document.F1.train2.value = "";
+                return false;
+            } else if (doj == '') {
+                alert("Please select Date of Journey");
+                return false;
+            } else if (tyc == '') {
+                alert("Please select Type of Ticket");
+                return false;
+            } else if (tyt == '') {
+                alert("Please select Type of Booking");
+                return false;
+            }
+        }
+        function clearFunc() {
+            document.getElementById("email").value = "";
+            document.getElementById("pwd1").value = "";
+        }
+    </script>
+    <style>
+        body {
+            background-image: url('/static/plane18.jpg');
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+        .transparent-button {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+        .clickable-img {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="alert alert-danger" role="alert">
+        {% for message in messages %}
+        <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    <center>
+        <form name="F1" method="POST" onSubmit="return login(this)" action="{{ url_for('admin.ticket_admin_bp.ticket_admin') }}">
+            <fieldset style="width:38%; border-end-start-radius:25;">
+                <h3>BOOK A TICKET</h3>
+                <hr>
+                <table>
+                    <tr>
+                        <td>
+                            <img src="{{ url_for('static', filename='from2.png') }}" width="21" height="16">
+                            <input list="source" name="origin" id="train1" placeholder="ORIGIN">
+                            <datalist id="source" name="train1">
+                                {% for airport in airports %}
+                                    <option value="{{ airport.airport_name }}">{{ airport.airport_name }}</option>
+                                {% endfor %}
+                            </datalist>
+                        </td>
+                        <td>
+                            <label for="jd">Journey Date:</label>
+                            <input name="jd" type="date" id="doj">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <img src="{{ url_for('static', filename='updo.png') }}" alt="Arrow Up" width="20" height="20" onclick="swapText()" class="clickable-img">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img src="{{ url_for('static', filename='to.jpg') }}" width="22" height="16">
+                            <input list="source" name="dest" id="train2" placeholder="DESTINATION">
+                            <datalist id="source" name="train1">
+                                {% for airport in airports %}
+                                    <option value="{{ airport.airport_name }}">{{ airport.airport_name }}</option>
+                                {% endfor %}
+                            </datalist>
+                        </td>
+                        <td><label for="tycl">Plane Class:</label>
+                            <select name="tycl" id="tyc">
+                                <option value="FIRST CLASS">FIRST CLASS</option>
+                                <option value="BUSINESS CLASS">BUSINESS CLASS</option>
+                                <option value="PREMIUM ECONOMY">PREMIUM ECONOMY</option>
+                                <option value="ECONOMY">ECONOMY</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <script>
+                                function showAlert() {
+                                    var ld = document.getElementById("tyt").value;
+                                    if (ld === "DEFENCE" || ld === "GOVT EMPLOYEE" || ld === "SENIOR CITIZEN" || ld === "STUDENT" ) {
+                                        alert("Special Category passengers need to carry a Photo Identity card issued by the Government which is to be produced for On-board / Off-board verification during the journey.: " + ld);
+                                    }
+                                }
+                            </script>
+                            &nbsp&nbsp<br>
+                           
+                            <label for="tyt">Ticket Type:</label>
+                            <select name="tyt" id="tyt" onchange="showAlert()">
+                                <option value="GENERAL">GENERAL</option>
+                                <option value="DEFENCE">DEFENCE</option>
+                                <option value="GOVT EMPLOYEE">GOVT EMPLOYEE</option>
+                                <option value="SENIOR CITIZEN">SENIOR CITIZEN</option>
+                                <option value="STUDENT">STUDENT</option>
+                            </select>
+                        </td>
+                        <td><br>&nbsp
+                            <label for="tm">Trip Mode:</label>
+                            <select name="tm" id="tripMode">
+                                <option value="ONE WAY">ONE WAY</option>
+                                <option value="ROUND TRIP">ROUND TRIP</option>
+                            </select>
+                        </td>
+                        </tr>
+                        <tr>
+                        <td><br>
+                            <script type="text/javascript">
+                                window.onload = function() {
+                                    var today = new Date().toISOString().split('T')[0];
+                                    var returnDateInput = document.getElementsByName("rd")[0];
+                                    var journeyDateInput = document.getElementsByName("jd")[0];
+                            
+                                    // Set the minimum date for both journey and return date inputs to today
+                                    returnDateInput.setAttribute('min', today);
+                                    journeyDateInput.setAttribute('min', today);
+                            
+                                    // Initially disable the return date input
+                                    returnDateInput.disabled = true;
+                            
+                                    // Add event listener to the trip mode select element
+                                    document.getElementById('tripMode').addEventListener('change', function() {
+                                        if (this.value === 'ROUND TRIP') {
+                                            returnDateInput.disabled = false;
+                                        } else {
+                                            returnDateInput.disabled = true;
+                                        }
+                                    });
+                            
+                                    // Add event listener to update the minimum return date based on the selected journey date
+                                    journeyDateInput.addEventListener('change', function() {
+                                        var journeyDate = new Date(journeyDateInput.value);
+                                        var minReturnDate = new Date(journeyDate);
+                                        minReturnDate.setDate(journeyDate.getDate() + 0);//our choince rd>jd ie 2 days 1 day some times same day
+                                        returnDateInput.min = minReturnDate.toISOString().split('T')[0];
+                                    });
+                            
+                                    // Add event listener to form submission to validate the return date
+                                    document.getElementById('dateForm').addEventListener('submit', function(event) {
+                                        var journeyDate = new Date(journeyDateInput.value);
+                                        var returnDate = new Date(returnDateInput.value);
+                                        if (returnDate <= journeyDate) {
+                                            alert('Return date must be at least two days after the journey date.');
+                                            event.preventDefault();
+                                        }
+                                    });
+                                }
+                            </script>
+                            
+                            
+                            <label for="rd">Return Date:</label>
+                            <input name="rd" type="date" id="dor" required disabled>
+                        </td>
+                       
+                    </tr>
+                    <tr>
+                        <td></td>
+                    </tr>
+                </table>
+                <br>
+                <input type="submit" value="SEARCH"  class="btn btn-primary">
+                <input type="reset" value="RESET" onclick="clearFunc()" class="btn btn-secondary">
+                <a href="{{ url_for('seat_avl_bp.seat_avl') }}" target="_blank">seat</a><br>
+               
+               
+            </fieldset>
+        </form><br>
+        
+        <br>
+    </center>
+    
+
+
+</body>
+</html>

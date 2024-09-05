@@ -1,0 +1,71 @@
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+import mysql.connector
+from datetime import datetime
+
+seat_avl_bp = Blueprint('seat_avl_bp', __name__)
+
+# Database connection configuration
+db_config = {
+    'host': 'localhost',
+    'user': 'root',  # Corrected key 'username' to 'user'
+    'password': 'tiger',
+    'database': 'airline'
+}
+
+def get_db_connection():
+    """Establish and return a database connection."""
+    return mysql.connector.connect(**db_config)
+
+@seat_avl_bp.route('/admin/ticket_admin', methods=['GET', 'POST'])
+def seat_avl():
+    if request.method == 'POST':
+        try:
+            # Get form data
+            fn = request.form['flight_number']
+            fnn = request.form['flight_name']
+            fc = request.form['flight_class']
+            jd2 = request.form['jd']
+
+            # Format the journey date to match database format
+            input_format = "%Y-%m-%d"
+            output_format = "%d/%b/%Y"
+            jd = datetime.strptime(jd2, input_format).strftime(output_format)
+
+            # Establish database connection
+            con = get_db_connection()
+            cursor = con.cursor()
+
+            # Query to check available seats for the selected flight
+            seat_query = """
+                SELECT flight_name, flight_number, flight_class, jd 
+                FROM flight_reservation
+                WHERE flight_number=%s AND flight_name=%s AND flight_class=%s AND jd=%s
+            """
+            cursor.execute(seat_query, (fn, fnn, fc, jd2))
+            seatss = cursor.fetchall()
+
+            # If seats are found, render the template with seat details
+            if seatss:
+                return render_template('admin/ticket_admin1.html', seatss=seatss)
+            else:
+                flash('No seats found for the selected flight.')
+                return redirect(url_for('seat_avl_bp.seat_avl'))
+
+        except Exception as ex:
+            # Handle exceptions and flash error message
+            print(f"Error: {ex}")
+            flash('An error occurred while processing your request. Please try again.')
+            return redirect(url_for('seat_avl_bp.seat_avl'))
+
+        finally:
+            # Ensure the cursor and connection are closed
+            cursor.close()
+            con.close()
+
+    # Render the form for seat availability checking
+    return render_template('admin/ticket_admin.html')
+
+
+
+
+no its displaying all the seats see the data that is flight_number=AA11AA flight_class=FIRST CLASS on the date jd=22/Aug/2024 is already booked 2 seats

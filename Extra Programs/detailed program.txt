@@ -1,0 +1,70 @@
+from flask import Blueprint, render_template, request, redirect, url_for, flash
+import mysql.connector
+from admin.utils import login_required
+
+ticket_download_user_bp = Blueprint('ticket_download_user_bp', __name__)
+
+# Database connection configuration
+db_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'tiger',
+    'database': 'airline'
+}
+
+def get_db_connection():
+    return mysql.connector.connect(**db_config)
+
+@ticket_download_user_bp.route('/user/ticket_download_user', methods=['GET', 'POST'])
+@login_required
+def ticket_download_user():
+    if request.method == 'POST':
+        try:
+            # Get form data
+            pnr = request.form.get('pnr')
+            usr = request.form.get('usr')
+            if not pnr:
+                flash("PNR not provided")
+                return redirect(url_for('user.ticket_download_user_bp.ticket_download_user'))
+
+            # Database operations
+            con = get_db_connection()
+            cursor_reservation = con.cursor(dictionary=True)
+            cursor_sitting = con.cursor(dictionary=True)
+            
+            cursor_reservation.execute("SELECT * FROM airline_reservation WHERE PNR = %s AND ausr = %s ORDER BY PNR DESC", (pnr, usr))
+            reservation_details = cursor_reservation.fetchall()
+
+            cursor_sitting.execute("SELECT * FROM airline_sitting WHERE PNR = %s AND ausr = %s ORDER BY Seat_number DESC", (pnr, usr))
+            sitting_details = cursor_sitting.fetchall()
+
+            cursor_reservation.close()
+            cursor_sitting.close()
+            con.close()
+
+            if not reservation_details or not sitting_details:
+                flash("No PNR Number found. Please enter a valid PNR.")
+                return redirect(url_for('user.ticket_download_user_bp.ticket_download_user'))
+
+            # Debug output
+            print("Reservation Details:", reservation_details)
+            print("Sitting Details:", sitting_details)
+
+            return render_template('user/ticket_download_user_su.html', reservation=reservation_details, sitting=sitting_details)
+        except mysql.connector.Error as err:
+            print(f"Database error: {err}")
+            flash(f'A database error occurred: {err}')
+        except Exception as ex:
+            print(f"Error: {ex}")
+            flash(f'An error occurred while processing your request: {ex}')
+        finally:
+            if 'cursor_reservation' in locals() and cursor_reservation:
+                cursor_reservation.close()
+            if 'cursor_sitting' in locals() and cursor_sitting:
+                cursor_sitting.close()
+            if 'con' in locals() and con.is_connected():
+                con.close()
+
+        return redirect(url_for('user.ticket_download_user_bp.ticket_download_user'))
+
+    return render_template('user/ticket_download_user.html')
