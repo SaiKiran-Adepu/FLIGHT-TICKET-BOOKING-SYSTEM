@@ -1,4 +1,4 @@
-# SKA-FLIGHT-BOOKING-SYSTEM
+# FLIGHT-TICKET-BOOKING-SYSTEM
 The Application is mainly based on the IRCTC Flights web application here passengers can allowed to book a reservation ticket while login in the application 
 to achieve this i am used Technologies front end Html, CSS, JS Backend Python Flask, and Database MYSQL
 in this project there are 3 main modules  
